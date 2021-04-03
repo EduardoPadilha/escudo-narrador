@@ -1,0 +1,54 @@
+@page "/caracteristica"
+@using EscudoNarrador.Shared.Entidades
+@inject HttpClient Http
+
+<h1>Características</h1>
+
+<p>As características já cadastradas</p>
+
+@if (caracteristicas == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Nome</th>
+                <th>Tipo</th>
+                <th>Tags</th>
+                <th>Pontos Fixos</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var carac in caracteristicas)
+            {
+                <tr>
+                    <td>@carac.Id</td>
+                    <td>@carac.Nome</td>
+                    <td>@carac.Tipo.ToString()</td>
+                    <td>@string.Join(", ", carac.Tags)</td>
+                    <td>@carac.Pontos</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private Caracteristica[] caracteristicas;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            caracteristicas = await Http.GetFromJsonAsync<Caracteristica[]>("/api/caracteristica");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+        }
+    }
+}
