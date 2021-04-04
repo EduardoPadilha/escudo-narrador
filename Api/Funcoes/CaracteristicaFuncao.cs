@@ -32,28 +32,28 @@ namespace EscudoNarrador.Api.Funcoes
             new Caracteristica
             {
                 Id = Guid.Parse("65B80388-0A81-4774-9E8D-D2B28B01757A"),
-                Nome = "Força",
-                Tags = new string[] { "Atributo", "Poder", "Físico" },
+                Nome = "ForÃ§a",
+                Tags = new string[] { "Atributo", "Poder", "FÃ­sico" },
                 Tipo = TipoCaracteristica.Ponto | TipoCaracteristica.Expansivel
             },
             new Caracteristica
             {
                 Id = Guid.Parse("A1DDF4D2-6A77-4034-BB99-ED0A892F28AA"),
-                Nome = "Inteligência",
+                Nome = "InteligÃªncia",
                 Tags = new string[] { "Atributo", "Poder", "Mental" },
                 Tipo = TipoCaracteristica.Ponto | TipoCaracteristica.Expansivel
             },
             new Caracteristica
             {
                 Id = Guid.Parse("8D53F9E0-87D8-4406-8B97-589A6491272D"),
-                Nome = "Manipulação",
+                Nome = "ManipulaÃ§Ã£o",
                 Tags = new string[] { "Atributo", "Refinamento", "Social" },
                 Tipo = TipoCaracteristica.Ponto | TipoCaracteristica.Expansivel
             },
             new Caracteristica
             {
                 Id = Guid.Parse("738CD674-AF3B-4C7A-BE82-A6E2DC7896C9"),
-                Nome = "Ofícios",
+                Nome = "OfÃ­cios",
                 Tags = new string[] { "Habilidade", "Mental" },
                 Tipo = TipoCaracteristica.Ponto | TipoCaracteristica.Expansivel
             },
@@ -69,7 +69,7 @@ namespace EscudoNarrador.Api.Funcoes
             {
                 Id = Guid.Parse("DE178069-BE8F-466C-A438-0DC9583F677C"),
                 Nome = "Ambidestro",
-                Tags = new string[] { "Vantagem", "Física" },
+                Tags = new string[] { "Vantagem", "FÃ­sica" },
                 Tipo = TipoCaracteristica.Ponto | TipoCaracteristica.Fixo,
                 Pontos = 3
             },
@@ -81,8 +81,8 @@ namespace EscudoNarrador.Api.Funcoes
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "caracteristica/")] HttpRequest req,
             ILogger log)
         {
-            var nome = req.Query.Obter("nome")?.ToLower();
-            var tagsParam = req.Query.Obter("tags")?.ToLower();
+            var nome = req.Query.Obter<string>("nome")?.ToLower();
+            var tagsParam = req.Query.Obter<string>("tags")?.ToLower();
             var tags = tagsParam?.Split(",").Select(c => c.Trim()).ToList();
             IEnumerable<Caracteristica> query = Caracteristicas;
             if (!string.IsNullOrEmpty(nome))
@@ -100,7 +100,7 @@ namespace EscudoNarrador.Api.Funcoes
         {
             if (id == Guid.Empty)
             {
-                var argumentMsg = $"Erro em {nameof(ObterCaracteristaPorId)}, id da característica deve vir no path da requisição.";
+                var argumentMsg = $"Erro em {nameof(ObterCaracteristaPorId)}, id da caracterÃ­stica deve vir no path da requisiÃ§Ã£o.";
                 log.LogError(argumentMsg);
                 return new BadRequestObjectResult(new { error = argumentMsg });
             }
