@@ -1,5 +1,7 @@
 @page "/caracteristica"
 @using EscudoNarrador.Shared.Entidades
+@using EscudoNarrador.Shared.Enums
+@using EscudoNarrador.Shared.Dtos.Entrada
 @inject HttpClient Http
 
 <h1>Características</h1>
@@ -12,6 +14,53 @@
 }
 else
 {
+    <EditForm Model="@caracteristica" OnValidSubmit="@ValidarSubmeter">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <p>
+            <label>
+                Nome:
+                <InputText @bind-Value="caracteristica.Nome" />
+            </label>
+        </p>
+        <p>
+            <label>
+                Tags:
+                <InputTextArea @bind-Value="tags" />
+            </label>
+        </p>
+        <p>
+            <label>
+                Ponto:
+                <InputNumber @bind-Value="caracteristica.Pontos" />
+            </label>
+        </p>
+        <p>
+            <label>
+                Pontos:
+                <InputCheckbox @bind-Value="tipos[TipoCaracteristica.Ponto]" />
+            </label>
+            <label>
+                Expansível:
+                <InputCheckbox @bind-Value="tipos[TipoCaracteristica.Expansivel]" />
+            </label>
+            <label>
+                Fixo:
+                <InputCheckbox @bind-Value="tipos[TipoCaracteristica.Fixo]" />
+            </label>
+            <label>
+                Consumível:
+                <InputCheckbox @bind-Value="tipos[TipoCaracteristica.Consumivel]" />
+            </label>
+            <label>
+                Informativo:
+                <InputCheckbox @bind-Value="tipos[TipoCaracteristica.Informativa]" />
+            </label>
+        </p>
+        <button type="submit">Cadastrar</button>
+    </EditForm>
+
     <table class="table">
         <thead>
             <tr>
@@ -26,7 +75,6 @@ else
             @foreach (var carac in caracteristicas)
             {
                 <tr>
-                    <td>@carac.Id</td>
                     <td>@carac.Nome</td>
                     <td>@carac.Tipo.ToString()</td>
                     <td>@string.Join(", ", carac.Tags)</td>
@@ -40,8 +88,40 @@ else
 @code {
     private Caracteristica[] caracteristicas;
 
+    private Caracteristica caracteristica = new Caracteristica();
+    private string tags;
+
+    private Dictionary<TipoCaracteristica, bool> tipos;
+
+    private void ValidarSubmeter()
+    {
+        caracteristica.Tags = tags.Split(';');
+        foreach (var tipo in tipos)
+            if (tipo.Value)
+                caracteristica.Tipo = caracteristica.Tipo | tipo.Key;
+
+
+    }
+
+    private async void LimparFormulario()
+    {
+        caracteristica = new Caracteristica();
+        tipos = new Dictionary<TipoCaracteristica, bool>
+{
+            {TipoCaracteristica.Ponto, false },
+            {TipoCaracteristica.Fixo, false },
+            {TipoCaracteristica.Expansivel, false },
+            {TipoCaracteristica.Consumivel, false },
+            {TipoCaracteristica.Informativa, false },
+        };
+        var resposta = await Http.PostAsJsonAsync("/api/caracteristica", AddCaracteristicaDto.Construir(caracteristica));
+        if (resposta.IsSuccessStatusCode)
+            Console.WriteLine(resposta.ReasonPhrase);
+    }
+
     protected override async Task OnInitializedAsync()
     {
+        LimparFormulario();
         try
         {
             caracteristicas = await Http.GetFromJsonAsync<Caracteristica[]>("/api/caracteristica");
