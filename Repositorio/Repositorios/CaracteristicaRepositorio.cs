@@ -79,7 +79,7 @@ namespace EscudoNarrador.Repositorio.Repositorios
         {
             try
             {
-                var query = tabela.CreateQuery<CaracteristicaMapeamento>().AsQueryable()
+                var query = tabela.CreateQuery<CaracteristicaMapeamento>()
                     .Where(c => c.PartitionKey == sistema.ToString() &&
                     c.RowKey.Contains(nome) && tags.All(t => c.Tags.Any(tt => tt.ToLower() == t)));
 
