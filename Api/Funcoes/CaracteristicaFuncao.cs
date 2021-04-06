@@ -31,9 +31,9 @@ namespace EscudoNarrador.Api.Funcoes
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "caracteristica")] HttpRequest req,
             ILogger log)
         {
-            var nome = req.Query.Obter<string>("nome")?.ToLower();
-            var tagsParam = req.Query.Obter<string>("tags")?.ToLower();
-            var tags = tagsParam?.Split(",").Select(c => c.Trim()).ToList()?? new List<string>();
+            var nome = req.Query.Obter<string>("nome");
+            var tagsParam = req.Query.Obter<string>("tags");
+            var tags = tagsParam?.Split(",").Select(c => c.Trim()).ToList() ?? new List<string>();
 
             var resultado = repositorio.ObterTodos(nome, TipoSistema.Storyteller, tags.ToArray());
             return new OkObjectResult(resultado);

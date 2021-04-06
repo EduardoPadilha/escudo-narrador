@@ -9,6 +9,6 @@ namespace EscudoNarrador.Shared.Abstracoes.Repositorios
     {
         Task<Caracteristica> AdicionarAsync(Caracteristica entidade);
         Task<Caracteristica> ObterAsync(string nome, TipoSistema sistema);
-        Task<List<Caracteristica>> ObterTodos(string nome, TipoSistema sistema, string[] tags);
+        List<Caracteristica> ObterTodos(string nome, TipoSistema sistema, string[] tags);
     }
 }

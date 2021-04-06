@@ -14,10 +14,7 @@
 }
 else
 {
-    <EditForm Model="@caracteristica" OnValidSubmit="@ValidarSubmeter">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
-
+    <EditForm Model="@caracteristica" OnSubmit="@ValidarSubmeter">
         <p>
             <label>
                 Nome:
@@ -32,30 +29,30 @@ else
         </p>
         <p>
             <label>
-                Ponto:
+                Pontos:
                 <InputNumber @bind-Value="caracteristica.Pontos" />
             </label>
         </p>
         <p>
             <label>
-                Pontos:
-                <InputCheckbox @bind-Value="tipos[TipoCaracteristica.Ponto]" />
-            </label>
-            <label>
-                Expansível:
-                <InputCheckbox @bind-Value="tipos[TipoCaracteristica.Expansivel]" />
+                Ponto:
+                <InputCheckbox @bind-Value="Ponto" />
             </label>
             <label>
                 Fixo:
-                <InputCheckbox @bind-Value="tipos[TipoCaracteristica.Fixo]" />
+                <InputCheckbox @bind-Value="Fixo" />
+            </label>
+            <label>
+                Expansível:
+                <InputCheckbox @bind-Value="Expansivel" />
             </label>
             <label>
                 Consumível:
-                <InputCheckbox @bind-Value="tipos[TipoCaracteristica.Consumivel]" />
+                <InputCheckbox @bind-Value="Consumivel" />
             </label>
             <label>
                 Informativo:
-                <InputCheckbox @bind-Value="tipos[TipoCaracteristica.Informativa]" />
+                <InputCheckbox @bind-Value="Informativa" />
             </label>
         </p>
         <button type="submit">Cadastrar</button>
@@ -64,7 +61,6 @@ else
     <table class="table">
         <thead>
             <tr>
-                <th>Id</th>
                 <th>Nome</th>
                 <th>Tipo</th>
                 <th>Tags</th>
@@ -93,30 +89,48 @@ else
 
     private Dictionary<TipoCaracteristica, bool> tipos;
 
-    private void ValidarSubmeter()
+    private bool Ponto;
+    private bool Fixo;
+    private bool Expansivel;
+    private bool Consumivel;
+    private bool Informativa;
+
+
+    private async void ValidarSubmeter()
     {
-        caracteristica.Tags = tags.Split(';');
-        foreach (var tipo in tipos)
-            if (tipo.Value)
-                caracteristica.Tipo = caracteristica.Tipo | tipo.Key;
+        caracteristica.Tags = tags.Contains(";") ? tags.Split(';') : tags.Split(',');
+        if (Ponto)
+            caracteristica.Tipo = caracteristica.Tipo | TipoCaracteristica.Ponto;
+        if (Fixo)
+            caracteristica.Tipo = caracteristica.Tipo | TipoCaracteristica.Fixo;
+        if (Expansivel)
+            caracteristica.Tipo = caracteristica.Tipo | TipoCaracteristica.Expansivel;
+        if (Consumivel)
+            caracteristica.Tipo = caracteristica.Tipo | TipoCaracteristica.Consumivel;
+        if (Informativa)
+            caracteristica.Tipo = caracteristica.Tipo | TipoCaracteristica.Informativa;
 
-
-    }
-
-    private async void LimparFormulario()
-    {
-        caracteristica = new Caracteristica();
-        tipos = new Dictionary<TipoCaracteristica, bool>
-{
-            {TipoCaracteristica.Ponto, false },
-            {TipoCaracteristica.Fixo, false },
-            {TipoCaracteristica.Expansivel, false },
-            {TipoCaracteristica.Consumivel, false },
-            {TipoCaracteristica.Informativa, false },
-        };
         var resposta = await Http.PostAsJsonAsync("/api/caracteristica", AddCaracteristicaDto.Construir(caracteristica));
         if (resposta.IsSuccessStatusCode)
             Console.WriteLine(resposta.ReasonPhrase);
+
+        LimparFormulario();
+    }
+
+    private void LimparFormulario()
+    {
+        caracteristica = new Caracteristica();
+        tags = string.Empty;
+        Ponto = false;
+        Fixo = false;
+        Expansivel = false;
+        Consumivel = false;
+        Informativa = false;
+    }
+
+    public void changeOption(ChangeEventArgs __e, TipoCaracteristica key)
+    {
+        tipos[key] = !tipos[key];
     }
 
     protected override async Task OnInitializedAsync()

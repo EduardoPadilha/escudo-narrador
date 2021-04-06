@@ -3,8 +3,10 @@ using EscudoNarrador.Repositorio.Mapeamento;
 using EscudoNarrador.Shared.Abstracoes.Repositorios;
 using EscudoNarrador.Shared.Entidades;
 using EscudoNarrador.Shared.Enums;
+using EscudoNarrador.Shared.Extensoes;
 using Microsoft.Azure.Cosmos.Table;
 using Microsoft.Extensions.Logging;
+using Nebularium.Tarrasque.Extensoes;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -75,21 +77,26 @@ namespace EscudoNarrador.Repositorio.Repositorios
             }
         }
 
-        public async Task<List<Caracteristica>> ObterTodos(string nome, TipoSistema sistema, string[] tags)
+        public List<Caracteristica> ObterTodos(string nome, TipoSistema sistema, string[] tags)
         {
             try
             {
                 var query = tabela.CreateQuery<CaracteristicaMapeamento>()
-                    .Where(c => c.PartitionKey == sistema.ToString() &&
-                    c.RowKey.Contains(nome) && tags.All(t => c.Tags.Any(tt => tt.ToLower() == t)));
+                    .Where(c => c.PartitionKey == sistema.ToString());
+                if (!string.IsNullOrWhiteSpace(nome))
+                {
+                    nome = nome.HigienizaString();
+                    query = query.Where(c => c.RowKey == nome);
+                }
 
                 var caracteristicasBd = query.ToList();
                 if (caracteristicasBd == null)
                     throw new RecursoNaoEncontradoException();
+                var tagsHigienizadas = tags.Select(c => c.HigienizaString());
+                caracteristicasBd = caracteristicasBd.Where(c => tagsHigienizadas.All(tag => c.TagsHigienizadas.Contains(tag))).ToList();
+                var caracteristicas = caracteristicasBd.ConvertAll(c => c.ParaEntidade());
 
-                log.LogInformation(JsonConvert.SerializeObject(caracteristicasBd));
-
-                return caracteristicasBd.ConvertAll(c => c.ParaEntidade());
+                return caracteristicas;
             }
             catch (StorageException e)
             {
