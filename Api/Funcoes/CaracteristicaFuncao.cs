@@ -41,7 +41,9 @@ namespace EscudoNarrador.Api.Funcoes
             }
             catch (Exception e)
             {
-                return new BadRequestObjectResult(e.Message);
+                var mensagem = e.GetBaseException().Message;
+                log.LogError(mensagem);
+                return new BadRequestObjectResult(mensagem);
             }
         }
 
@@ -67,7 +69,9 @@ namespace EscudoNarrador.Api.Funcoes
             }
             catch (Exception e)
             {
-                return new BadRequestObjectResult(e.Message);
+                var mensagem = e.GetBaseException().Message;
+                log.LogError(mensagem);
+                return new BadRequestObjectResult(mensagem);
             }
             return new OkObjectResult(result);
         }
@@ -86,7 +90,9 @@ namespace EscudoNarrador.Api.Funcoes
             }
             catch (Exception e)
             {
-                return new BadRequestObjectResult(e.Message);
+                var mensagem = e.GetBaseException().Message;
+                log.LogError(mensagem);
+                return new BadRequestObjectResult(mensagem);
             }
         }
     }
