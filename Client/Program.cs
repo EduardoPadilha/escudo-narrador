@@ -1,8 +1,9 @@
+using MatBlazor;
+using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace EscudoNarrador.Client
 {
@@ -15,6 +16,16 @@ namespace EscudoNarrador.Client
 
             var baseAddress = builder.Configuration["BaseAddress"] ?? builder.HostEnvironment.BaseAddress;
             builder.Services.AddScoped(_ => new HttpClient { BaseAddress = new Uri(baseAddress) });
+            builder.Services.AddMatBlazor();
+            builder.Services.AddMatToaster(config =>
+            {
+                config.Position = MatToastPosition.TopRight;
+                config.PreventDuplicates = true;
+                config.NewestOnTop = true;
+                config.ShowCloseButton = true;
+                config.MaximumOpacity = 100;
+                config.VisibleStateDuration = 5000;
+            });
 
             await builder.Build().RunAsync();
         }
