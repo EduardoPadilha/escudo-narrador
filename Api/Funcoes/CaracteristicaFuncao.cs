@@ -34,9 +34,15 @@ namespace EscudoNarrador.Api.Funcoes
             var nome = req.Query.Obter<string>("nome");
             var tagsParam = req.Query.Obter<string>("tags");
             var tags = tagsParam?.Split(",").Select(c => c.Trim()).ToList() ?? new List<string>();
-
-            var resultado = repositorio.ObterTodos(nome, TipoSistema.Storyteller, tags.ToArray());
-            return new OkObjectResult(resultado);
+            try
+            {
+                var resultado = repositorio.ObterTodos(nome, TipoSistema.Storyteller, tags.ToArray());
+                return new OkObjectResult(resultado);
+            }
+            catch (Exception e)
+            {
+                return new BadRequestObjectResult(e.Message);
+            }
         }
 
         [FunctionName(nameof(ObterCaracteristaPorId))]
@@ -59,6 +65,10 @@ namespace EscudoNarrador.Api.Funcoes
             {
                 return new NotFoundObjectResult("Característica não encontrada");
             }
+            catch (Exception e)
+            {
+                return new BadRequestObjectResult(e.Message);
+            }
             return new OkObjectResult(result);
         }
 
@@ -69,10 +79,15 @@ namespace EscudoNarrador.Api.Funcoes
             var content = await new StreamReader(req.Body).ReadToEndAsync();
 
             var dto = JsonConvert.DeserializeObject<AddCaracteristicaDto>(content);
-
-            var result = await repositorio.AdicionarAsync(dto.ParaEntidade()); ;
-
-            return new OkObjectResult(result);
+            try
+            {
+                var result = await repositorio.AdicionarAsync(dto.ParaEntidade());
+                return new OkObjectResult(result);
+            }
+            catch (Exception e)
+            {
+                return new BadRequestObjectResult(e.Message);
+            }
         }
     }
 }
