@@ -1,15 +1,36 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="sidebar">
-    <NavMenu />
-</div>
+<MatAppBarContainer>
+    <MatAppBar Fixed="true">
+        <MatAppBarRow>
+            <MatAppBarSection>
+                <MatIconButton Icon="menu" OnClick="@((e) => ToggleDrawer())"></MatIconButton>
+                <MatAppBarTitle>Escudo do Narrador</MatAppBarTitle>
+            </MatAppBarSection>
+            <MatAppBarSection Align="@MatAppBarSectionAlign.End">
+                <MatIconButton Icon="help"></MatIconButton>
+            </MatAppBarSection>
+        </MatAppBarRow>
+    </MatAppBar>
 
-<div class="main">
-    <div class="top-row px-4">
-        <a href="http://blazor.net" target="_blank" class="ml-md-auto">About</a>
-    </div>
+    <MatAppBarContent>
+        <MatDrawerContainer Style="width: 100%; height: 100%;">
+            <MatDrawer @bind-Opened="@aberto" Mode="@MatDrawerMode.Modal">
+                <DrawerLinks FecharDrawer="ToggleDrawer" />
+            </MatDrawer>
+            <MatDrawerContent>
+                @Body
+            </MatDrawerContent>
+        </MatDrawerContainer>
+    </MatAppBarContent>
+</MatAppBarContainer>
 
-    <div class="content px-4">
-        @Body
-    </div>
-</div>
+@code
+{
+    bool aberto = false;
+
+    void ToggleDrawer()
+    {
+        aberto = !aberto;
+    }
+}

@@ -1,0 +1,55 @@
+﻿@page "/caracteristica"
+@using EscudoNarrador.Shared.Entidades
+
+@inject NavigationManager Url
+@inject HttpClient Http
+
+<h3>Caracteristicas</h3>
+
+<style>
+    .app-fab--absolute {
+        position: fixed;
+        bottom: 1rem;
+        right: 1rem;
+    }
+</style>
+
+@if (caracteristicas == null)
+{
+    <p><em>Carregando...</em></p>
+}
+else
+{
+    <MatFAB Class="app-fab--absolute" Icon="@MatIconNames.Add" OnClick="@((e) => Url.NavigateTo("caracteristica/formulario"))"></MatFAB>
+
+    <MatTable Items="@caracteristicas" class="mat-elevation-z5" PageSize="15" ShowPaging="false">
+        <MatTableHeader>
+            <th>Nome</th>
+            <th>Tipo</th>
+            <th>Tags</th>
+            <th>Pontos Fixos</th>
+        </MatTableHeader>
+        <MatTableRow>
+            <td>@context.Nome</td>
+            <td>@context.Tipo.ToString()</td>
+            <td>@string.Join(", ", context.Tags)</td>
+            <td>@context.Pontos</td>
+        </MatTableRow>
+    </MatTable>
+}
+
+@code {
+    private Caracteristica[] caracteristicas;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            caracteristicas = await Http.GetFromJsonAsync<Caracteristica[]>("/api/caracteristica");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+        }
+    }
+}
