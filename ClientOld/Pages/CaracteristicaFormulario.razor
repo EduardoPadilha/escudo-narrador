@@ -1,0 +1,100 @@
+﻿@page "/caracteristica/formulario"
+@using EscudoNarrador.Shared.Entidades
+@using EscudoNarrador.Shared.Enums
+@using EscudoNarrador.Shared.Dtos.Entrada
+
+@inject NavigationManager Url
+@inject HttpClient Http
+
+<h3>Caracteristicas</h3>
+
+<style>
+    .mat-toast-container > div {
+        opacity: 1 !important;
+    }
+</style>
+
+@*<EditForm Model="@caracteristica" OnSubmit="@ValidarSubmeter">*@
+<p>
+    @*<MatTextField @bind-Value="caracteristica.Nome" Label="Nome"></MatTextField>*@
+    @caracteristica.Nome
+</p>
+<p>
+    @*<MatTextField @bind-Value="tags" Label="Tags" TextArea="true"></MatTextField>*@
+</p>
+<p>
+    @*<MatNumericUpDownField @bind-Value="caracteristica.Pontos" Label="Pontos"></MatNumericUpDownField>*@
+</p>
+<p>
+    @*<MatCheckbox @bind-Value="Ponto">Ponto</MatCheckbox>
+    <MatCheckbox @bind-Value="Fixo">Fixo</MatCheckbox>
+    <MatCheckbox @bind-Value="Expansivel">Expansível</MatCheckbox>
+    <MatCheckbox @bind-Value="Consumivel">Consumível</MatCheckbox>
+    <MatCheckbox @bind-Value="Informativa">Informativo</MatCheckbox>*@
+</p>
+@*<MatButton Outlined="true" Icon="@MatIconNames.Arrow_back" OnClick="@((e) => Url.NavigateTo("caracteristica"))">Voltar</MatButton>
+<MatButton Raised="true" Icon="@MatIconNames.Clear" OnClick="LimparFormulario">Limpar</MatButton>
+<MatButton Raised="true" Icon="@MatIconNames.Save" OnClick="@ValidarSubmeter">Cadastrar</MatButton>*@
+@*</EditForm>*@
+
+@code {
+    [CascadingParameter]
+    public ErroComponente TratamentoErro { get; set; }
+
+    private Caracteristica caracteristica = new Caracteristica();
+    private string tags = string.Empty;
+
+    private Dictionary<TipoCaracteristica, bool> tipos;
+
+    private bool Ponto;
+    private bool Fixo;
+    private bool Expansivel;
+    private bool Consumivel;
+    private bool Informativa;
+
+    private async void ValidarSubmeter()
+    {
+        caracteristica.Tags = tags.Contains(";") ? tags.Split(';') : tags.Split(',');
+        if (Ponto)
+            caracteristica.Tipo = caracteristica.Tipo | TipoCaracteristica.Ponto;
+        if (Fixo)
+            caracteristica.Tipo = caracteristica.Tipo | TipoCaracteristica.Fixo;
+        if (Expansivel)
+            caracteristica.Tipo = caracteristica.Tipo | TipoCaracteristica.Expansivel;
+        if (Consumivel)
+            caracteristica.Tipo = caracteristica.Tipo | TipoCaracteristica.Consumivel;
+        if (Informativa)
+            caracteristica.Tipo = caracteristica.Tipo | TipoCaracteristica.Informativa;
+        try
+        {
+
+            var resposta = await Http.PostAsJsonAsync("/api/caracteristica", AddCaracteristicaDto.Construir(caracteristica));
+            if (resposta.IsSuccessStatusCode)
+                Console.WriteLine(resposta.ReasonPhrase);
+            LimparFormulario();
+            //Toaster.Add("Característica cadastrada!", MatToastType.Success, "Sucesso", @MatIconNames.Check);
+        }
+        catch (Exception e)
+        {
+            TratamentoErro.ProcessarErro(e.GetBaseException());
+            //Toaster.Add("Ocorreu um erro", MatToastType.Danger, "Erro", @MatIconNames.Error);
+        }
+    }
+
+    private void LimparFormulario()
+    {
+        caracteristica = new Caracteristica();
+        tags = string.Empty;
+        Ponto = false;
+        Fixo = false;
+        Expansivel = false;
+        Consumivel = false;
+        Informativa = false;
+        //var t = Toaster.Add("Formulário limpo", MatToastType.Info, "Limpo", @MatIconNames.Notification_important);
+    }
+
+    public void changeOption(ChangeEventArgs __e, TipoCaracteristica key)
+    {
+        tipos[key] = !tipos[key];
+    }
+}
