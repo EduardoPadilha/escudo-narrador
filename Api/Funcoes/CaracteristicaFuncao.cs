@@ -33,7 +33,9 @@ namespace EscudoNarrador.Api.Funcoes
         {
             var nome = req.Query.Obter<string>("nome");
             var tagsParam = req.Query.Obter<string>("tags");
-            var tags = tagsParam?.Split(",").Select(c => c.Trim()).ToList() ?? new List<string>();
+            tagsParam = string.IsNullOrWhiteSpace(tagsParam) ? null : tagsParam;
+            var separador = tagsParam?.IndexOf(";") > 0 ? ";" : ",";
+            var tags = tagsParam?.Split(separador).Select(c => c.Trim()).ToList() ?? new List<string>();
             try
             {
                 var resultado = repositorio.ObterTodos(nome, TipoSistema.Storyteller, tags.ToArray());

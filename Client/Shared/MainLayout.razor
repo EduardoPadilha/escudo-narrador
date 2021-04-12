@@ -1,17 +1,38 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
 
-    <div class="main">
-        <div class="top-row px-4">
-            <a href="http://blazor.net" target="_blank" class="ml-md-auto">About</a>
-        </div>
+<MudLayout>
+    <MudAppBar Elevation="1">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@AbrirDrawer" />
+        <MudAppBarSpacer />
+        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/Garderoben/MudBlazor" Target="_blank" />
+    </MudAppBar>
+    <MudDrawer @bind-Open="@aberto" Elevation="1" Variant="@DrawerVariant.Temporary">
+        <MudDrawerHeader>
+            <MudText Typo="Typo.h6">Escudo Narrado</MudText>
+        </MudDrawerHeader>
+        <MudNavMenu>
+            <MudNavLink Href="/">Home</MudNavLink>
+            <MudNavLink Href="caracteristica">Características</MudNavLink>
+            <MudNavLink Match="NavLinkMatch.All">COnfigurações</MudNavLink>
+        </MudNavMenu>
+    </MudDrawer>
+    <MudMainContent Class="pt-16 px-16">
+        @Body
+        @*<MudContainer Class="mt-6">
+            <MudAlert Severity="Severity.Success" Class="mt-16">Text inside MudContainer</MudAlert>
+        </MudContainer>*@
+    </MudMainContent>
+</MudLayout>
 
-        <div class="content px-4">
-            @Body
-        </div>
-    </div>
-</div>
+@code{
+    bool aberto = false;
+
+    public void AbrirDrawer()
+    {
+        aberto = true;
+    }
+}

@@ -83,18 +83,21 @@ namespace EscudoNarrador.Repositorio.Repositorios
             {
                 var query = tabela.CreateQuery<CaracteristicaMapeamento>()
                     .Where(c => c.PartitionKey == sistema.ToString());
-                if (!string.IsNullOrWhiteSpace(nome))
-                {
-                    nome = nome.HigienizaString();
-                    query = query.Where(c => c.RowKey == nome);
-                }
 
                 var caracteristicasBd = query.ToList();
                 if (caracteristicasBd == null)
                     throw new RecursoNaoEncontradoException();
+
                 var tagsHigienizadas = tags.Select(c => c.HigienizaString());
-                caracteristicasBd = caracteristicasBd.Where(c => tagsHigienizadas.All(tag => c.TagsHigienizadas.Contains(tag))).ToList();
-                var caracteristicas = caracteristicasBd.ConvertAll(c => c.ParaEntidade());
+
+                IEnumerable<CaracteristicaMapeamento> consulta = caracteristicasBd;
+                if (!nome.LimpoNuloBranco())
+                    consulta = consulta.Where(c => c.RowKey.Contains(nome));
+
+                if (tags.AnySafe())
+                    consulta = consulta.Where(c => tagsHigienizadas.All(tag => c.TagsHigienizadas.Split(";").Contains(tag)));
+
+                var caracteristicas = consulta.ToList().ConvertAll(c => c.ParaEntidade());
 
                 return caracteristicas;
             }
