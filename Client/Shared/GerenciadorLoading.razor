@@ -1,0 +1,27 @@
+﻿
+<CascadingValue Value=this>
+    @ChildContent
+</CascadingValue>
+
+<MudOverlay Visible="carregando" DarkBackground="true">
+    <MudProgressCircular Color="Color.Secondary" Indeterminate="true" />
+</MudOverlay>
+
+@code {
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    private bool carregando = false;
+
+    public Action<bool> AtualizarLoading;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        AtualizarLoading = valor =>
+        {
+            carregando = valor;
+            StateHasChanged();
+        };
+    }
+}

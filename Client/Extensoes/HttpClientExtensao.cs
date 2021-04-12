@@ -11,19 +11,27 @@ namespace Client.Extensoes
     {
         #region GET
 
-        public async static Task<T> GetAsync<T>(this HttpClient cliente, string path, Dictionary<string, string> parametros = null)
+        public async static Task<T> GetAsync<T>(this HttpClient cliente, string path, Dictionary<string, string> parametros = null, Action<bool> atualizaLoading = null)
         {
             string corpoResposta = await GetAsync(cliente, path, parametros);
 
             return JsonConvert.DeserializeObject<T>(corpoResposta);
         }
-        public async static Task<string> GetAsync(this HttpClient cliente, string path, Dictionary<string, string> parametros = null)
+        public async static Task<string> GetAsync(this HttpClient cliente, string path, Dictionary<string, string> parametros = null, Action<bool> atualizaLoading = null)
         {
+            atualizaLoading.TrataAtualizacaoLoading(true);
             var url = MontaUrl(cliente.BaseAddress, path, parametros);
 
             Console.WriteLine($"[Disparando GET] URL = {url}");
             var resposta = await cliente.GetAsync(url);
+            atualizaLoading.TrataAtualizacaoLoading(false);
             return await MontaResposta(resposta);
+        }
+
+        private static void TrataAtualizacaoLoading(this Action<bool> atualizaLoading, bool valor)
+        {
+            if (atualizaLoading != null)
+                atualizaLoading(valor);
         }
 
         #endregion
