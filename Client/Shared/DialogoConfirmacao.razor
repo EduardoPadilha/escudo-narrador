@@ -1,0 +1,18 @@
+﻿<MudDialog>
+    <DialogContent>
+        <MudText>@TextoCorpo</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancelar">Cancelar</MudButton>
+        <MudButton Color="@CorBotao" OnClick="Confirmar">@TextoBotao</MudButton>
+    </DialogActions>
+</MudDialog>
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    [Parameter] public string TextoCorpo { get; set; }
+    [Parameter] public string TextoBotao { get; set; }
+    [Parameter] public Color CorBotao { get; set; }
+
+    void Confirmar() => MudDialog.Close(DialogResult.Ok(true));
+    void Cancelar() => MudDialog.Cancel();
+}

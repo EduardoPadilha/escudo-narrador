@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
 using System.Web;
 
@@ -26,6 +27,33 @@ namespace Client.Extensoes
             var resposta = await cliente.GetAsync(url);
             atualizaLoading.TrataAtualizacaoLoading(false);
             return await MontaResposta(resposta);
+        }
+
+        public async static Task<HttpResponseMessage> PostAsJsonAsync<T>(this HttpClient http, string path, T corpoPost, Action<bool> atualizaLoading)
+        {
+            atualizaLoading.TrataAtualizacaoLoading(true);
+            Console.WriteLine($"[Disparando POST] URL = {path}");
+            var resultado = await http.PostAsJsonAsync(path, corpoPost);
+            atualizaLoading.TrataAtualizacaoLoading(false);
+            return resultado;
+        }
+
+        public async static Task<HttpResponseMessage> PutAsJsonAsync<T>(this HttpClient http, string path, T corpoPost, Action<bool> atualizaLoading)
+        {
+            atualizaLoading.TrataAtualizacaoLoading(true);
+            Console.WriteLine($"[Disparando PUT] URL = {path}");
+            var resultado = await http.PutAsJsonAsync(path, corpoPost);
+            atualizaLoading.TrataAtualizacaoLoading(false);
+            return resultado;
+        }
+
+        public async static Task<HttpResponseMessage> DeleteAsync<T>(this HttpClient http, string path, Action<bool> atualizaLoading)
+        {
+            atualizaLoading.TrataAtualizacaoLoading(true);
+            Console.WriteLine($"[Disparando DELETE] URL = {path}");
+            var resultado = await http.DeleteAsync(path);
+            atualizaLoading.TrataAtualizacaoLoading(false);
+            return resultado;
         }
 
         private static void TrataAtualizacaoLoading(this Action<bool> atualizaLoading, bool valor)

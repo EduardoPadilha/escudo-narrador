@@ -12,7 +12,13 @@
 
     public void ProcessarErro(Exception ex)
     {
-        //Text = ex;
-        Snackbar.Add(ex.GetBaseException().Message, Severity.Error);
+        var msg = ex.GetBaseException().Message;
+        ProcessarErro(msg);
+    }
+
+    public void ProcessarErro(string msg)
+    {
+        Snackbar.Add(msg, Severity.Error);
+        Console.WriteLine(msg);
     }
 }
