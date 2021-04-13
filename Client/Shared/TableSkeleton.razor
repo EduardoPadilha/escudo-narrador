@@ -1,0 +1,73 @@
+﻿<CascadingValue Value=this>
+    @if (carregando)
+    {
+        <MudSimpleTable Style="overflow-x: auto;" Dense="@Dense">
+            <thead>
+                <tr>
+                    <td><MudSkeleton Height="50px" /></td>
+                    @for (int row = 1; row < Labels.Split(";").Length - 2; row++)
+                    {
+                        <td></td>
+                    }
+                    <td colspan="2 "><MudSkeleton Height="50px" /></td>
+                </tr>
+                <tr>
+                    @foreach (var h in Labels.Split(";"))
+                    {
+                        <th>@h</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @for (int row = 0; row < QtdLinhas; row++)
+                {
+                    <tr>
+                        @foreach (var x in Labels.Split(";"))
+                        {
+                            <td><MudSkeleton Class="mx-4" /></td>
+                        }
+                    </tr>
+                }
+                <tr>
+                    @for (int row = 0; row < Labels.Split(";").Length - 2; row++)
+                    {
+                        <td></td>
+                    }
+                    <td colspan="2">
+                        <MudSkeleton Height="40px" />
+                    </td>
+                </tr>
+            </tbody>
+        </MudSimpleTable>
+    }
+    <div style="display: @(carregando? "none": "block")">
+        @ChildContent
+    </div>
+</CascadingValue>
+
+
+
+@code {
+    [Parameter] public string Labels { get; set; }
+    [Parameter] public int QtdLinhas { get; set; }
+    [Parameter] public bool Dense { get; set; }
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    private bool carregando = false;
+
+    public Action<bool> AtualizarLoading;
+
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        QtdLinhas = QtdLinhas == 0 ?  5: QtdLinhas;
+        AtualizarLoading = valor =>
+        {
+            carregando = valor;
+            StateHasChanged();
+        };
+    }
+}
