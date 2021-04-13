@@ -32,9 +32,10 @@ namespace EscudoNarrador.Repositorio.Repositorios
             if (entidade == null)
                 throw new ArgumentNullException("entidade");
 
+            var entidadeTable = new CaracteristicaMapeamento(entidade);
             try
             {
-                var operacaoAddOuMerge = TableOperation.InsertOrMerge(new CaracteristicaMapeamento(entidade));
+                var operacaoAddOuMerge = TableOperation.Insert(entidadeTable);
 
                 var resultado = await tabela.ExecuteAsync(operacaoAddOuMerge);
                 var insertedCustomer = resultado.Result as CaracteristicaMapeamento;
@@ -47,6 +48,39 @@ namespace EscudoNarrador.Repositorio.Repositorios
             catch (StorageException e)
             {
                 log.LogError(e, "Erro ao adicionar uma caracateristica");
+                if (e.Message.Contains("The specified entity already exists"))
+                    throw new UnicidadeException(entidadeTable.RowKey);
+                throw;
+            }
+            catch (Exception e)
+            {
+                log.LogError(e, "Erro desconhecido");
+                throw;
+            }
+        }
+
+        public async Task<Caracteristica> AtualizarAsync(Caracteristica entidade)
+        {
+            if (entidade == null)
+                throw new ArgumentNullException("entidade");
+
+            try
+            {
+                var entidadeTable = new CaracteristicaMapeamento(entidade);
+                entidadeTable.ETag = "*";
+                var operacaoAddOuMerge = TableOperation.Merge(entidadeTable);
+
+                var resultado = await tabela.ExecuteAsync(operacaoAddOuMerge);
+                var insertedCustomer = resultado.Result as CaracteristicaMapeamento;
+
+                if (resultado.RequestCharge.HasValue)
+                    log.LogInformation("Request Charge of InsertOrMerge Operation: " + resultado.RequestCharge);
+
+                return insertedCustomer.ParaEntidade();
+            }
+            catch (StorageException e)
+            {
+                log.LogError(e, "Erro ao atualizar uma caracateristica");
                 throw;
             }
         }
@@ -55,7 +89,7 @@ namespace EscudoNarrador.Repositorio.Repositorios
         {
             try
             {
-                var operacoBusca = TableOperation.Retrieve<CaracteristicaMapeamento>(sistema.ToString(), nome);
+                var operacoBusca = TableOperation.Retrieve<CaracteristicaMapeamento>(sistema.ToString(), nome.HigienizaString());
                 var result = await tabela.ExecuteAsync(operacoBusca);
                 var caracteristicaBd = result.Result as CaracteristicaMapeamento;
                 if (caracteristicaBd == null)
@@ -104,6 +138,30 @@ namespace EscudoNarrador.Repositorio.Repositorios
             catch (StorageException e)
             {
                 log.LogError(e, $"Erro ao recuperar a caracateristicas");
+                throw;
+            }
+        }
+
+        public async Task DeletarAsync(string nome, TipoSistema sistema)
+        {
+            try
+            {
+                var operacoDelete = TableOperation.Delete(
+                    new CaracteristicaMapeamento
+                    {
+                        RowKey = nome.HigienizaString(),
+                        PartitionKey = sistema.ToString(),
+                        ETag = "*"
+                    });
+                var result = await tabela.ExecuteAsync(operacoDelete);
+                if (result.RequestCharge.HasValue)
+                {
+                    log.LogInformation("Request Charge of Retrieve Operation: " + result.RequestCharge);
+                }
+            }
+            catch (StorageException e)
+            {
+                log.LogError(e, $"Erro ao recuperar a caracateristica {nome}");
                 throw;
             }
         }

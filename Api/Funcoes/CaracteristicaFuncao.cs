@@ -80,15 +80,19 @@ namespace EscudoNarrador.Api.Funcoes
 
         [FunctionName(nameof(AdicionarCaracteristica))]
         public async Task<IActionResult> AdicionarCaracteristica(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "caracteristica")] HttpRequest req, ILogger log)
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", "put", Route = "caracteristica")] HttpRequest req, ILogger log)
         {
             var content = await new StreamReader(req.Body).ReadToEndAsync();
 
             var dto = JsonConvert.DeserializeObject<AddCaracteristicaDto>(content);
             try
             {
-                var result = await repositorio.AdicionarAsync(dto.ParaEntidade());
-                return new OkObjectResult(result);
+                var entidade = dto.ParaEntidade();
+                Caracteristica resultado;
+                if (HttpMethods.IsPost(req.Method))
+                    resultado = await repositorio.AdicionarAsync(entidade);
+                else resultado = await repositorio.AtualizarAsync(entidade);
+                return new OkObjectResult(resultado);
             }
             catch (Exception e)
             {
@@ -96,6 +100,34 @@ namespace EscudoNarrador.Api.Funcoes
                 log.LogError(mensagem);
                 return new BadRequestObjectResult(mensagem);
             }
+        }
+
+        [FunctionName(nameof(DeletarCaracterista))]
+        public async Task<IActionResult> DeletarCaracterista(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "caracteristica/{nome}")] HttpRequest req, string nome,
+            ILogger log)
+        {
+            if (string.IsNullOrWhiteSpace(nome))
+            {
+                var argumentMsg = $"Erro em {nameof(ObterCaracteristaPorId)}, id da característica deve vir no path da requisição.";
+                log.LogError(argumentMsg);
+                return new BadRequestObjectResult(new { error = argumentMsg });
+            }
+            try
+            {
+                await repositorio.DeletarAsync(nome, TipoSistema.Storyteller); ;
+            }
+            catch (RecursoNaoEncontradoException)
+            {
+                return new NotFoundObjectResult("Característica não encontrada");
+            }
+            catch (Exception e)
+            {
+                var mensagem = e.GetBaseException().Message;
+                log.LogError(mensagem);
+                return new BadRequestObjectResult(mensagem);
+            }
+            return new OkResult();
         }
     }
 }
