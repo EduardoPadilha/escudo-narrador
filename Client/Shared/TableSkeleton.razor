@@ -63,7 +63,7 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        QtdLinhas = QtdLinhas = 0 ?  5: q;
+        QtdLinhas = QtdLinhas == 0 ?  5: QtdLinhas;
         AtualizarLoading = valor =>
         {
             carregando = valor;
