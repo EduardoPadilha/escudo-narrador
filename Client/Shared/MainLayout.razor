@@ -1,14 +1,35 @@
 ﻿@inherits LayoutComponentBase
 
-<MudThemeProvider />
-<MudDialogProvider />
+<MudThemeProvider Theme="temaAtual" />
 <MudSnackbarProvider />
+<MudDialogProvider />
+
+<style>
+    .mudblazor-appbar-brand-text {
+        letter-spacing: .5rem;
+        font-weight: 300;
+        margin-left: 12px;
+        font-size: 24px;
+        user-select: none;
+    }
+
+    @@media(max-width:400px) {
+        .mudblazor-appbar-brand-text {
+            letter-spacing: .25rem;
+        }
+    }
+</style>
 
 <MudLayout>
     <MudAppBar Elevation="1">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@AbrirDrawer" />
+        <MudText Typo="Typo.h5" Class="mudblazor-appbar-brand-text">Escudo do Narrador</MudText>
+
         <MudAppBarSpacer />
-        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/Garderoben/MudBlazor" Target="_blank" />
+        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/EduardoPadilha" Target="_blank" />
+        <MudTooltip Text="Modo Claro/Escuro">
+            <MudIconButton Icon="@Icons.Filled.Brightness4" Color="Color.Inherit" OnClick="((e) => DarkMode())" />
+        </MudTooltip>
     </MudAppBar>
     <MudDrawer @bind-Open="@aberto" Elevation="1" Variant="@DrawerVariant.Temporary">
         <MudDrawerHeader>
@@ -20,11 +41,8 @@
             <MudNavLink Match="NavLinkMatch.All">COnfigurações</MudNavLink>
         </MudNavMenu>
     </MudDrawer>
-    <MudMainContent Class="pt-16 px-16">
+    <MudMainContent Class="pt-16 px-16 mt-4">
         @Body
-        @*<MudContainer Class="mt-6">
-            <MudAlert Severity="Severity.Success" Class="mt-16">Text inside MudContainer</MudAlert>
-        </MudContainer>*@
     </MudMainContent>
 </MudLayout>
 
@@ -35,4 +53,53 @@
     {
         aberto = true;
     }
+}
+
+@code{
+
+    protected override void OnInitialized()
+    {
+        temaAtual = temaClaro;
+    }
+
+    void DarkMode()
+    {
+        if (temaAtual == temaClaro)
+        {
+            temaAtual = temaEscuro;
+        }
+        else
+        {
+            temaAtual = temaClaro;
+        }
+    }
+
+    MudTheme temaAtual = new MudTheme();
+    MudTheme temaClaro = new MudTheme()
+    {
+        Palette = new Palette()
+        {
+            Black = "#272c34"
+        }
+    };
+    MudTheme temaEscuro = new MudTheme()
+    {
+        Palette = new Palette()
+        {
+            Black = "#27272f",
+            Background = "#32333d",
+            BackgroundGrey = "#27272f",
+            Surface = "#373740",
+            DrawerBackground = "#27272f",
+            DrawerText = "rgba(255,255,255, 0.50)",
+            DrawerIcon = "rgba(255,255,255, 0.50)",
+            AppbarBackground = "#27272f",
+            AppbarText = "rgba(255,255,255, 0.70)",
+            TextPrimary = "rgba(255,255,255, 0.70)",
+            TextSecondary = "rgba(255,255,255, 0.50)",
+            ActionDefault = "#adadb1",
+            ActionDisabled = "rgba(255,255,255, 0.26)",
+            ActionDisabledBackground = "rgba(255,255,255, 0.12)"
+        }
+    };
 }

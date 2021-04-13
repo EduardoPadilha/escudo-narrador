@@ -8,8 +8,6 @@
 @inject NavigationManager Url
 @inject HttpClient Http
 
-<MudText Typo="Typo.h4">Características</MudText>
-
 <style>
     .app-fab--absolute {
         position: fixed;
@@ -19,38 +17,40 @@
 </style>
 
 <MudFab Class="app-fab--absolute" Color="Color.Primary" Icon="@Icons.Material.Filled.Add" />
+<TableSkeleton Dense="true" Labels="Nome;Tipo;Tags;Pontos Fixos" QtdLinhas="10" @ref="TabelaEsqueleto">
+    <MudTable Hover="true" Breakpoint="Breakpoint.Sm" Dense="true" @ref="table"
+              ServerData="@(new Func<TableState, Task<TableData<Caracteristica>>>(ServerReload))">
+        <ToolBarContent>
+            <MudText Class="d-none d-sm-flex" Typo="Typo.h6">Características</MudText>
+            <MudToolBarSpacer />
+            <MudTextField T="string" ValueChanged="@(s=>OnSearch(s))" Placeholder="nome, tags separadas por ';'" Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh>Nome</MudTh>
+            <MudTh>Tipo</MudTh>
+            <MudTh Class="d-none d-sm-flex">Tags</MudTh>
+            <MudTh>Pontos Fixos</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Nome">@context.Nome</MudTd>
+            <MudTd DataLabel="Tipo">@context.Tipo.ToString()</MudTd>
+            <MudTd DataLabel="Tags" Class="d-none d-sm-flex">@string.Join(", ", context.Tags)</MudTd>
+            <MudTd DataLabel="Pontos Fixos">@context.Pontos</MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+    </MudTable>
+</TableSkeleton>
 
-<MudTable Hover="true" Breakpoint="Breakpoint.Sm" Dense="true" @ref="table"
-          ServerData="@(new Func<TableState, Task<TableData<Caracteristica>>>(ServerReload))">
-    <ToolBarContent>
-        <MudText Class="d-none d-sm-flex" Typo="Typo.h6">Características</MudText>
-        <MudToolBarSpacer />
-        <MudTextField T="string" ValueChanged="@(s=>OnSearch(s))" Placeholder="nome, tags separadas por ';'" Adornment="Adornment.Start"
-                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-    </ToolBarContent>
-    <HeaderContent>
-        <MudTh>Nome</MudTh>
-        <MudTh>Tipo</MudTh>
-        <MudTh Class="d-none d-sm-flex">Tags</MudTh>
-        <MudTh>Pontos Fixos</MudTh>
-    </HeaderContent>
-    <RowTemplate>
-        <MudTd DataLabel="Nome">@context.Nome</MudTd>
-        <MudTd DataLabel="Tipo">@context.Tipo.ToString()</MudTd>
-        <MudTd DataLabel="Tags" Class="d-none d-sm-flex">@string.Join(", ", context.Tags)</MudTd>
-        <MudTd DataLabel="Pontos Fixos">@context.Pontos</MudTd>
-    </RowTemplate>
-    <PagerContent>
-        <MudTablePager />
-    </PagerContent>
-</MudTable>
+
 
 @code {
     [CascadingParameter]
     public ErroComponente Error { get; set; }
 
-    [CascadingParameter]
-    public GerenciadorLoading Loading { get; set; }
+    public TableSkeleton TabelaEsqueleto { get; set; }
 
     private IEnumerable<Caracteristica> pagedData;
     private MudTable<Caracteristica> table;
@@ -58,12 +58,10 @@
     private int totalItems;
     private string searchString = "";
 
-
     private async Task<TableData<Caracteristica>> ServerReload(TableState state)
     {
         try
         {
-            StateHasChanged();
             var tags = ObtemTagsDaBusca(searchString);
             var termoBusca = RemoveHashTags(searchString);
 
@@ -71,7 +69,7 @@
 {
                 {"nome", termoBusca },
                 {"tags", string.Join(';', tags) }
-            }, Loading.AtualizarLoading);
+            }, TabelaEsqueleto.AtualizarLoading);
             var caracteristicas = JsonConvert.DeserializeObject<List<Caracteristica>>(dataJson);
 
             totalItems = caracteristicas.Count();
@@ -82,11 +80,15 @@
         }
         catch (Exception e)
         {
-            Loading.AtualizarLoading(false);
-            StateHasChanged();
+            TabelaEsqueleto.AtualizarLoading(false);
             Error.ProcessarErro(e);
             return new TableData<Caracteristica>() { TotalItems = 0, Items = null };
         }
+    }
+
+    private void AtualizaLoading(bool valor)
+    {
+
     }
 
     private string RemoveHashTags(string texto)
