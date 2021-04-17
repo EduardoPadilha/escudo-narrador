@@ -20,7 +20,8 @@ jobs:
           submodules: true
       - name: Build And Deploy
         id: builddeploy
-        uses: Azure/static-web-apps-deploy@v0.0.1-preview
+      - run: dotnet nuget add source https://nuget.pkg.github.com/EduardoPadilha/index.json -n github -u ${{secrets.PACKAGE_NOME}} --store-password-in-clear-text -p ${{secrets.PACKAGE_TOKEN}} 
+      - uses: Azure/static-web-apps-deploy@v0.0.1-preview
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_LIVELY_COAST_0AEDECF10 }}
           repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
@@ -31,7 +32,6 @@ jobs:
           api_location: "Api" # Api source code path - optional
           output_location: "wwwroot" # Built app content directory - optional
           ###### End of Repository/Build Configurations ######
-      - run: dotnet nuget add source https://nuget.pkg.github.com/EduardoPadilha/index.json -n github -u ${{secrets.PACKAGE_NOME}} --store-password-in-clear-text -p ${{secrets.PACKAGE_TOKEN}} 
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
