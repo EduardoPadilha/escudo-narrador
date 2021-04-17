@@ -1,24 +1,3 @@
-﻿@inject ISnackbar Snackbar
-
-<CascadingValue Value=this>
+﻿<CascadingValue Value=this>
     @ChildContent
 </CascadingValue>
-
-
-@code {
-    [Parameter]
-    public RenderFragment ChildContent { get; set; }
-    //public string Text { get; set; }
-
-    public void ProcessarErro(Exception ex)
-    {
-        var msg = ex.GetBaseException().Message;
-        ProcessarErro(msg);
-    }
-
-    public void ProcessarErro(string msg)
-    {
-        Snackbar.Add(msg, Severity.Error);
-        Console.WriteLine(msg);
-    }
-}

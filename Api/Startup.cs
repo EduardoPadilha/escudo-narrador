@@ -1,5 +1,7 @@
-﻿using EscudoNarrador.Repositorio.Recursos;
+﻿using EscudoNarrador.Dominio.Recursos;
+using EscudoNarrador.Repositorio.Recursos;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
+using Nebularium.Tarrasque.Recursos;
 
 [assembly: FunctionsStartup(typeof(EscudoNarrador.Api.Startup))]
 namespace EscudoNarrador.Api
@@ -10,7 +12,11 @@ namespace EscudoNarrador.Api
         {
             builder.Services
                 .AddOpcoes()
-                .AddRepositorios();
+                .AddAutoMapper()
+                .AddRepositorios()
+                .AddRecursos()
+                .AddServicos()
+                .AddGestorDependenciaAspnetPadrao();
         }
     }
 }

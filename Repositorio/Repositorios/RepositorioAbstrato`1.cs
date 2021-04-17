@@ -14,11 +14,12 @@ using System.Threading.Tasks;
 
 namespace EscudoNarrador.Repositorio.Repositorios
 {
-    public abstract class RepositorioAbstrato<TEntidade> :
-        RepositorioBase<TEntidade>, IRepositorio<TEntidade>
-        where TEntidade : class, ITableEntity, new()
+    public abstract class RepositorioAbstrato<TEntidade, TMapeamento> :
+        RepositorioBase<TMapeamento>, IRepositorio<TEntidade>
+        where TMapeamento : class, ITableEntity, new()
+        where TEntidade : class, new()
     {
-        protected RepositorioAbstrato(ICosmosTableContexto contexto, ILogger<TEntidade> log) :
+        protected RepositorioAbstrato(ICosmosTableContexto contexto, ILogger<TMapeamento> log) :
             base(contexto, log)
         {
         }
@@ -28,15 +29,16 @@ namespace EscudoNarrador.Repositorio.Repositorios
             if (entidade == null)
                 throw new ArgumentNullException("entidade");
 
+            var mapeamento = entidade.Como<TMapeamento>();
             try
             {
-                var operacaoAdd = TableOperation.Insert(entidade);
-                return await ExecutarAsync(operacaoAdd);
+                var operacaoAdd = TableOperation.Insert(mapeamento);
+                return await ExecutarAsync<TEntidade>(operacaoAdd);
             }
             catch (StorageException e)
             {
                 if (e.Message.Contains("The specified entity already exists"))
-                    throw new UnicidadeException(entidade.RowKey);
+                    throw new UnicidadeException(mapeamento.RowKey);
                 throw;
             }
         }
@@ -46,23 +48,24 @@ namespace EscudoNarrador.Repositorio.Repositorios
             if (entidade == null)
                 throw new ArgumentNullException("entidade");
 
-            entidade.ETag = "*";
-            var operacaoMerge = TableOperation.Merge(entidade);
-            return await ExecutarAsync(operacaoMerge);
+            var mapeamento = entidade.Como<TMapeamento>();
+            mapeamento.ETag = "*";
+            var operacaoMerge = TableOperation.Merge(mapeamento);
+            return await ExecutarAsync<TEntidade>(operacaoMerge);
         }
 
         public virtual async Task DeletarAsync(string chaveParticao, string chaveLinha)
         {
-            var entidade = CriarInstancia(chaveParticao, chaveLinha);
-            entidade.ETag = "*";
-            var operacoDelete = TableOperation.Delete(entidade);
-            await ExecutarAsync(operacoDelete);
+            var mapeamento = CriarInstancia(chaveParticao, chaveLinha);
+            mapeamento.ETag = "*";
+            var operacoDelete = TableOperation.Delete(mapeamento);
+            await ExecutarAsync<TEntidade>(operacoDelete);
         }
 
         public virtual async Task<TEntidade> ObterAsync(string chaveParticao, string chaveLinha)
         {
-            var operacoBusca = TableOperation.Retrieve<TEntidade>(chaveParticao, chaveLinha);
-            var entidade = await ExecutarAsync(operacoBusca);
+            var operacoBusca = TableOperation.Retrieve<TMapeamento>(chaveParticao, chaveLinha);
+            var entidade = await ExecutarAsync<TEntidade>(operacoBusca);
             if (entidade == null)
                 throw new RecursoNaoEncontradoException();
 
@@ -80,10 +83,10 @@ namespace EscudoNarrador.Repositorio.Repositorios
         {
             var todos = ObterTodos(chaveParticao);
 
-            if (todos.AnySafe())
-                return Enumerable.Empty<TEntidade>();
+            if (todos == null)
+                throw new RecursoNaoEncontradoException();
 
-            var predicadoConvertido = predicado.ConvertePredicado<T, TEntidade>();
+            var predicadoConvertido = predicado.ConvertePredicado<T, TMapeamento>();
             var consulta = todos.Where(predicadoConvertido).ToList();
             var resultado = consulta.Como<IEnumerable<TEntidade>>();
 

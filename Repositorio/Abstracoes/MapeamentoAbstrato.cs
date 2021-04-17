@@ -2,16 +2,9 @@
 
 namespace EscudoNarrador.Repositorio.Abstracoes
 {
-    public abstract class MapeamentoAbstrato<T> : TableEntity
+    public abstract class MapeamentoAbstrato<TEntidade> : TableEntity
+        where TEntidade : class, new()
     {
-        public MapeamentoAbstrato(T entidade)
-        {
-        }
-        public MapeamentoAbstrato(string chaveParticao, string chaveLinha)
-        {
-            PartitionKey = chaveParticao;
-            RowKey = chaveLinha;
-        }
-        public abstract T ParaEntidade();
+        protected MapeamentoAbstrato() { }
     }
 }
