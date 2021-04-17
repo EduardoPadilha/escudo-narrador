@@ -19,7 +19,7 @@ jobs:
         with:
           submodules: true
       - name: Add GitHub Packages Source
-          run: dotnet nuget add source https://nuget.pkg.github.com/EduardoPadilha/index.json -n github -u ${{secrets.PACKAGE_NOME}}  -p ${{secrets.PACKAGE_TOKEN}} 
+        run: dotnet nuget add source https://nuget.pkg.github.com/EduardoPadilha/index.json -n github -u ${{secrets.PACKAGE_NOME}}  -p ${{secrets.PACKAGE_TOKEN}} 
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v0.0.1-preview
