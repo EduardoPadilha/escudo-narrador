@@ -1,0 +1,53 @@
+﻿@page "/{sistema:guid}/termo/formulario/{id?}"
+
+@using EscudoNarrador.Entidade.Enums;
+@using Nebularium.Tarrasque.Extensoes
+
+
+
+<div style="max-width: 400px;margin: auto;">
+    <EditForm Model="@modelo" OnValidSubmit="OnValidSubmit">
+        <DataAnnotationsValidator />
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Edição de termo</MudText>
+                </CardHeaderContent>
+                <CardHeaderActions>
+                    @if (operacaoAtaulizacao)
+                    {
+                        <MudTooltip Text="Deletar">
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="AbrirExclusaoPopUp" />
+                        </MudTooltip>
+                    }
+                </CardHeaderActions>
+            </MudCardHeader>
+
+            <MudCardContent>
+                <MudTextField Label="Nome" HelperText="Mín. 3 caracteres" Disabled="@operacaoAtaulizacao"
+                              @bind-Value="modelo.Nome" For="@(() => modelo.Nome)" />
+
+                <MudTextField Label="Tags" Class="mt-3" Lines="2" HelperText="Tags separadas com ',' ou ';'"
+                              @bind-Value="modelo.TagsCampo" For="@(() => modelo.TagsCampo)" />
+
+                <MudSelect T="TipoTermo" Label="Tipo de termo"
+                           MultiSelection="true" @bind-SelectedValues="modelo.Tipos">
+                    @foreach (var state in Enum.GetValues<TipoTermo>())
+                    {
+                        <MudSelectItem T="TipoTermo" Value="@state">@state.DescricaoUnica()</MudSelectItem>
+                    }
+                </MudSelect>
+
+                <MudField Label="Quantidade de Pontos">
+                    <MudRating @bind-SelectedValue="modelo.Pontos" MaxValue="10" Color="Color.Dark"
+                               FullIcon="@Icons.Material.Filled.Circle" EmptyIcon="@Icons.Material.Outlined.Lens" />
+                </MudField>
+            </MudCardContent>
+
+            <MudCardActions>
+                <MudButton Variant="Variant.Text" Link="@($"{Sistema}/termo")">Voltar</MudButton>
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">@(operacaoAtaulizacao?"Salvar": "Cadastrar")</MudButton>
+            </MudCardActions>
+        </MudCard>
+    </EditForm>
+</div>

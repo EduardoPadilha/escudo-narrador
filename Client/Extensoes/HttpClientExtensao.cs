@@ -1,4 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using Client.Excecoes;
+using Client.VOs;
+using Nebularium.Tarrasque.Extensoes;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -25,6 +28,7 @@ namespace Client.Extensoes
 
             Console.WriteLine($"[Disparando GET] URL = {url}");
             var resposta = await cliente.GetAsync(url);
+            await VerificaRetorno(resposta);
             atualizaLoading.TrataAtualizacaoLoading(false);
             return await MontaResposta(resposta);
         }
@@ -33,27 +37,50 @@ namespace Client.Extensoes
         {
             atualizaLoading.TrataAtualizacaoLoading(true);
             Console.WriteLine($"[Disparando POST] URL = {path}");
-            var resultado = await http.PostAsJsonAsync(path, corpoPost);
+            var resposta = await http.PostAsJsonAsync(path, corpoPost);
+            await VerificaRetorno(resposta);
             atualizaLoading.TrataAtualizacaoLoading(false);
-            return resultado;
+            return resposta;
         }
 
         public async static Task<HttpResponseMessage> PutAsJsonAsync<T>(this HttpClient http, string path, T corpoPost, Action<bool> atualizaLoading)
         {
             atualizaLoading.TrataAtualizacaoLoading(true);
             Console.WriteLine($"[Disparando PUT] URL = {path}");
-            var resultado = await http.PutAsJsonAsync(path, corpoPost);
+            var resposta = await http.PutAsJsonAsync(path, corpoPost);
+            await VerificaRetorno(resposta);
             atualizaLoading.TrataAtualizacaoLoading(false);
-            return resultado;
+            return resposta;
         }
 
         public async static Task<HttpResponseMessage> DeleteAsync<T>(this HttpClient http, string path, Action<bool> atualizaLoading)
         {
             atualizaLoading.TrataAtualizacaoLoading(true);
             Console.WriteLine($"[Disparando DELETE] URL = {path}");
-            var resultado = await http.DeleteAsync(path);
+            var resposta = await http.DeleteAsync(path);
+            await VerificaRetorno(resposta);
             atualizaLoading.TrataAtualizacaoLoading(false);
-            return resultado;
+            return resposta;
+        }
+
+
+        #endregion
+
+        #region Suportes as chamadas http
+
+        private async static Task VerificaRetorno(HttpResponseMessage resposta)
+        {
+            if (resposta.IsSuccessStatusCode) return;
+
+            var json = await resposta.Content.ReadAsStringAsync();
+
+            if (json.LimpoNuloBranco())
+                throw new Exception($"[{resposta.StatusCode}] {resposta.ReasonPhrase}");
+
+            var erroValidacao = JsonConvert.DeserializeObject<ErroValidacao[]>(json);
+            if (erroValidacao.AnySafe())
+                throw new ValidacaoExcecao(erroValidacao);
+            throw new Exception(json);
         }
 
         private static void TrataAtualizacaoLoading(this Action<bool> atualizaLoading, bool valor)
@@ -61,10 +88,6 @@ namespace Client.Extensoes
             if (atualizaLoading != null)
                 atualizaLoading(valor);
         }
-
-        #endregion
-
-        #region Suportes as chamadas http
 
         //private static StringContent MontaRequisicaoCoporJson(object corpo)
         //{
