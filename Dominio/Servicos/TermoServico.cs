@@ -1,11 +1,13 @@
 ﻿using EscudoNarrador.Dominio.Abstracoes;
 using EscudoNarrador.Dominio.Abstracoes.Repositorios;
-using EscudoNarrador.Dominio.Excecoes;
-using EscudoNarrador.Dominio.Extensoes;
+using EscudoNarrador.Dominio.Filtros;
 using EscudoNarrador.Dominio.Validadores;
 using EscudoNarrador.Entidade;
+using EscudoNarrador.Entidade.Extensoes;
 using Microsoft.Extensions.Logging;
 using Nebularium.Tiamat.Abstracoes;
+using Nebularium.Tiamat.Excecoes;
+using Nebularium.Tiamat.Recursos;
 using Nebularium.Tiamat.Validacoes;
 using System;
 using System.Collections.Generic;
@@ -16,31 +18,37 @@ namespace EscudoNarrador.Dominio.Servicos
 {
     public class TermoServico : ITermoServico
     {
-        private readonly ITermoRepositorio repositorio;
+        private readonly ITermoComandoRepositorio comandoRepositorio;
+        private readonly ITermoConsultaRepositorio consultaRepositorio;
         private readonly ILogger<Termo> log;
         private readonly ValidadorSimples validadorSimples;
         private readonly IValidador<Termo> validador;
 
-        public TermoServico(ITermoRepositorio repositorio, IValidador<Termo> validador,
+        public TermoServico(ITermoComandoRepositorio comandoRepositorio,
+            ITermoConsultaRepositorio consultaRepositorio,
+            IValidador<Termo> validador,
             ILogger<Termo> log)
         {
-            this.repositorio = repositorio;
+            this.comandoRepositorio = comandoRepositorio;
+            this.consultaRepositorio = consultaRepositorio;
             this.log = log;
-            validadorSimples = new ValidadorSimples();
-            validadorSimples.EventoFalhaValidacao = erros => throw new ValidacaoExcecao(erros);
+            validadorSimples = new ValidadorSimples
+            {
+                EventoFalhaValidacao = erros => throw new ValidacaoExcecao(erros)
+            };
             this.validador = validador;
             this.validador.EventoFalhaValidacao = erros => throw new ValidacaoExcecao(erros);
         }
 
-        public IEnumerable<Termo> ObterTodos(Guid sistema, string nome, string tags)
+        public Task<IEnumerable<Termo>> ObterTodosAsync(string sistema, string nome, string tags)
         {
             validadorSimples
-              .Add(ValidadorPadrao.Guid(nameof(sistema), sistema))
+              .Add(ValidadorPadrao.CampoVazio(nameof(sistema), sistema))
               .Validar();
 
             nome = nome.HigienizaString();
             var tagsArray = ConverteStringParaArray(tags);
-            var resultado = repositorio.ObterTodos(sistema.ToString(), nome, tagsArray);
+            var resultado = consultaRepositorio.ObterTodosAtivosAsync(new TermoFiltro(sistema, nome, tagsArray));
             return resultado;
         }
 
@@ -53,40 +61,56 @@ namespace EscudoNarrador.Dominio.Servicos
             return tagsHigienizadas?.ToArray();
         }
 
-        public async Task<Termo> ObterAsync(Guid sistema, string nome)
+        public async Task<Termo> ObterAsync(string sistema, string nome)
         {
             ValidarEntradas(sistema, nome);
 
             nome = nome.HigienizaString();
-            var resultado = await repositorio.ObterAsync(sistema.ToString(), nome);
-            return resultado;
+            var resultado = await consultaRepositorio.ObterTodosAtivosAsync(termo => termo.Sistema == sistema
+                                                                        && termo.NomeHigienizado == nome);
+            return resultado?.FirstOrDefault();
         }
 
         public async Task<Termo> AdicionarAsync(Termo termo)
         {
             validador.Validar(termo);
-            var resultado = await repositorio.AdicionarAsync(termo);
-            return resultado;
+            await comandoRepositorio.AdicionarAsync(termo);
+            return termo;
         }
 
         public async Task<Termo> AtualizarAsync(Termo termo)
         {
             validador.Validar(termo);
-            var resultado = await repositorio.AtualizarAsync(termo);
-            return resultado;
+            var atualizacoes = PropriedadeValorFabrica<Termo>.Iniciar()
+                 .Add(c => c.Tags, termo.Tags)
+                 .Add(c => c.Tipo, termo.Tipo)
+                 .Add(c => c.Pontos, termo.Pontos);
+            var resultado = await comandoRepositorio
+                .AtualizarUmAsync(termo => termo.Sistema == termo.Sistema && termo.Nome == termo.Nome, atualizacoes.ObterTodos);
+            if (resultado)
+                throw new Exception("Não foi possível atualizar. Para mais informações contate o administrador");
+
+            return termo;
         }
-        public async Task DeletarAsync(Guid sistema, string nome)
+        public async Task DeletarAsync(string sistema, string nome)
         {
             ValidarEntradas(sistema, nome);
 
             nome = nome.HigienizaString();
-            await repositorio.DeletarAsync(sistema.ToString(), nome);
+            var termo = await ObterAsync(sistema, nome);
+            if (termo != null)
+            {
+                var resultado = await comandoRepositorio.RemoverUmAsync(termo.Id);
+                if (resultado) return;
+            }
+
+            throw new Exception("Não foi possível deletar. Para mais informações contate o administrador");
         }
 
-        private void ValidarEntradas(Guid sistema, string nome)
+        private void ValidarEntradas(string sistema, string nome)
         {
             validadorSimples
-               .Add(ValidadorPadrao.Guid(nameof(sistema), sistema))
+               .Add(ValidadorPadrao.CampoVazio(nameof(sistema), sistema))
                .Add(ValidadorPadrao.CampoVazio(nameof(nome), nome))
                .Validar();
         }

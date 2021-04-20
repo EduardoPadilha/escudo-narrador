@@ -27,7 +27,6 @@ namespace Client.VOs
         public string[] Tags => TagsCampo.Contains(";") ? TagsCampo.Split(';') : TagsCampo.Split(',');
         public HashSet<TipoTermo> Tipos { get; set; } = new HashSet<TipoTermo>();
         public int Pontos { get; set; }
-        public Guid Sistema { get; set; }
 
         public TermoDTO ParaDTO()
         {

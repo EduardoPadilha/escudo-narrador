@@ -19,7 +19,7 @@ namespace Client.Pages.Termos
         [Inject] public IDialogService DialogService { get; set; }
 
         [Parameter] public string Id { get; set; }
-        [Parameter] public Guid Sistema { get; set; }
+        [Parameter] public string Sistema { get; set; }
 
         [CascadingParameter]
         public ErroComponente Error { get; set; }

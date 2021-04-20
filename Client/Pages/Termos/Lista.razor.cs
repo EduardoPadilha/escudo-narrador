@@ -21,7 +21,7 @@ namespace Client.Pages.Termos
 
         [CascadingParameter]
         public ErroComponente Error { get; set; }
-        [Parameter] public Guid Sistema { get; set; }
+        [Parameter] public string Sistema { get; set; }
 
         public TableSkeleton TabelaEsqueleto { get; set; }
 

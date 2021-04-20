@@ -5,4 +5,8 @@
     <RootNamespace>EscudoNarrador.Entidade</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Nebularium.Tiamat" Version="0.0.13" />
+  </ItemGroup>
+
 </Project>

@@ -1,29 +1,17 @@
 ﻿using EscudoNarrador.Dominio.Abstracoes.Repositorios;
-using EscudoNarrador.Repositorio.Abstracoes;
-using EscudoNarrador.Repositorio.Configuracoes;
 using EscudoNarrador.Repositorio.Repositorios;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Nebularium.Behemoth.Mongo.Abstracoes;
 
 namespace EscudoNarrador.Repositorio.Recursos
 {
     public static class ServicoExtensao
     {
-        public static IServiceCollection AddOpcoes(this IServiceCollection servicos)
-        {
-            servicos.AddOptions<ConexaoOpcoes>()
-                .Configure<IConfiguration>((settings, configuration) =>
-                {
-                    configuration.GetSection(nameof(ConexaoOpcoes)).Bind(settings);
-                });
-
-            return servicos;
-        }
-
         public static IServiceCollection AddRepositorios(this IServiceCollection servicos)
         {
-            servicos.AddSingleton<ICosmosTableContexto, CosmosTableContextoBase>();
-            servicos.AddSingleton<ITermoRepositorio, TermoRepositorio>();
+            servicos.AddSingleton<IMongoContexto, Contexto>();
+            servicos.AddSingleton<ITermoComandoRepositorio, TermoComandoRepositorio>();
+            servicos.AddSingleton<ITermoConsultaRepositorio, TermoConcusltaRepositorio>();
 
             return servicos;
         }

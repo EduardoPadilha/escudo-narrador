@@ -1,15 +1,14 @@
 using EscudoNarrador.Api.Extensoes;
 using EscudoNarrador.Dominio.Abstracoes;
-using EscudoNarrador.Dominio.Excecoes;
 using EscudoNarrador.Entidade;
 using EscudoNarrador.Fronteira.DTOs;
-using EscudoNarrador.Repositorio.Excecoes;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Nebularium.Tarrasque.Extensoes;
+using Nebularium.Tiamat.Excecoes;
 using Newtonsoft.Json;
 using System;
 using System.IO;
@@ -19,8 +18,6 @@ namespace EscudoNarrador.Api.Funcoes
 {
     public class TermoApi
     {
-        private const string MSG_NAO_ENCONTRADO = "Erro em {0}, a chave do termo deve vir no path da requisição.";
-        private const string MSG_SISTEMA_NAO_ENCONTRADO = "O id do sistema deve ser informado.";
         private readonly ITermoServico servico;
         public TermoApi(ITermoServico servico)
         {
@@ -30,13 +27,13 @@ namespace EscudoNarrador.Api.Funcoes
         [FunctionName(nameof(ObterTermos))]
         public IActionResult ObterTermos(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "{sistema}/termo")]
-        HttpRequest req, ILogger log, Guid sistema)
+        HttpRequest req, ILogger log, string sistema)
         {
             var nome = req.Query.Obter<string>("nome");
             var tags = req.Query.Obter<string>("tags");
             try
             {
-                var resultado = servico.ObterTodos(sistema, nome, tags);
+                var resultado = servico.ObterTodosAsync(sistema, nome, tags);
                 return new OkObjectResult(resultado);
             }
             catch (ValidacaoExcecao e)
@@ -56,14 +53,8 @@ namespace EscudoNarrador.Api.Funcoes
         [FunctionName(nameof(ObterTermoPorChaves))]
         public async Task<IActionResult> ObterTermoPorChaves(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "{sistema}/termo/{nome}")]
-        HttpRequest req, ILogger log, Guid sistema, string nome)
+        HttpRequest req, ILogger log, string sistema, string nome)
         {
-            if (string.IsNullOrWhiteSpace(nome))
-            {
-                var argumentoMsg = string.Format(MSG_NAO_ENCONTRADO, nameof(ObterTermoPorChaves));
-                log.LogError(argumentoMsg);
-                return new BadRequestObjectResult(new { erro = argumentoMsg });
-            }
             Termo result;
             try
             {
@@ -74,10 +65,6 @@ namespace EscudoNarrador.Api.Funcoes
                 var mensagem = JsonConvert.SerializeObject(e.Erros);
                 log.LogError(mensagem);
                 return new BadRequestObjectResult(mensagem);
-            }
-            catch (RecursoNaoEncontradoException)
-            {
-                return new NotFoundObjectResult("Termo não encontrado");
             }
             catch (Exception e)
             {
@@ -91,7 +78,7 @@ namespace EscudoNarrador.Api.Funcoes
         [FunctionName(nameof(SalvarTermo))]
         public async Task<IActionResult> SalvarTermo(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", "put", Route = "{sistema}/termo")]
-        HttpRequest req, ILogger log, Guid sistema)
+        HttpRequest req, ILogger log, string sistema)
         {
             var content = await new StreamReader(req.Body).ReadToEndAsync();
 
@@ -123,14 +110,8 @@ namespace EscudoNarrador.Api.Funcoes
         [FunctionName(nameof(DeletarTermo))]
         public async Task<IActionResult> DeletarTermo(
             [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "{sistema}/termo/{nome}")]
-        HttpRequest req, ILogger log, Guid sistema, string nome)
+        HttpRequest req, ILogger log, string sistema, string nome)
         {
-            if (string.IsNullOrWhiteSpace(nome))
-            {
-                var argumentMsg = string.Format(MSG_NAO_ENCONTRADO, nameof(DeletarTermo)); ;
-                log.LogError(argumentMsg);
-                return new BadRequestObjectResult(new { erro = argumentMsg });
-            }
             try
             {
                 await servico.DeletarAsync(sistema, nome);
@@ -140,10 +121,6 @@ namespace EscudoNarrador.Api.Funcoes
                 var mensagem = JsonConvert.SerializeObject(e.Erros);
                 log.LogError(mensagem);
                 return new BadRequestObjectResult(mensagem);
-            }
-            catch (RecursoNaoEncontradoException)
-            {
-                return new NotFoundObjectResult("Característica não encontrada");
             }
             catch (Exception e)
             {
