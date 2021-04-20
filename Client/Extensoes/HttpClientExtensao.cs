@@ -17,7 +17,7 @@ namespace Client.Extensoes
 
         public async static Task<T> GetAsync<T>(this HttpClient cliente, string path, Dictionary<string, string> parametros = null, Action<bool> atualizaLoading = null)
         {
-            string corpoResposta = await GetAsync(cliente, path, parametros);
+            string corpoResposta = await GetAsync(cliente, path, parametros, atualizaLoading);
 
             return JsonConvert.DeserializeObject<T>(corpoResposta);
         }

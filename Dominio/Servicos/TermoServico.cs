@@ -1,5 +1,5 @@
-﻿using EscudoNarrador.Dominio.Abstracoes;
-using EscudoNarrador.Dominio.Abstracoes.Repositorios;
+﻿using EscudoNarrador.Dominio.Abstracoes.Repositorios;
+using EscudoNarrador.Dominio.Abstracoes.Servicos;
 using EscudoNarrador.Dominio.Excecoes;
 using EscudoNarrador.Dominio.Extensoes;
 using EscudoNarrador.Dominio.Validadores;

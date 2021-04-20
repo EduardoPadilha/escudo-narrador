@@ -30,11 +30,9 @@ namespace Client.Pages.Termos
         private bool operacaoAtaulizacao = false;
         private TermoVO modelo = new TermoVO();
 
-
         private void LimparFormulario()
         {
-            modelo = new TermoVO();
-            StateHasChanged();
+            SetModelo(new TermoVO());
         }
 
         private async void AbrirExclusaoPopUp()
@@ -95,14 +93,19 @@ namespace Client.Pages.Termos
                     Error.ProcessarErro($"Não foi possível recuperar o registro {Id} para edição.");
                     return;
                 }
-                modelo = new TermoVO(termo);
-                StateHasChanged();
+                SetModelo(new TermoVO(termo));
             }
             catch (Exception e)
             {
                 Loading.AtualizarLoading(false);
                 Error.ProcessarErro(e);
             }
+        }
+
+        private void SetModelo(TermoVO termo)
+        {
+            modelo = termo;
+            StateHasChanged();
         }
     }
 }

@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace EscudoNarrador.Dominio.Abstracoes
+namespace EscudoNarrador.Dominio.Abstracoes.Servicos
 {
     public interface ITermoServico
     {

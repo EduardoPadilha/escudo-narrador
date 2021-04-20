@@ -63,16 +63,16 @@ namespace EscudoNarrador.Repositorio.Repositorios
 
         #region Suporte LINQ Querys
 
-        protected virtual IOrderedQueryable<TEntidade> ObterTodos(string chaveParticao)
+        protected virtual IQueryable<TEntidade> ObterTodos()
         {
-            var todos = tabela.CreateQuery<TEntidade>().Where(c => c.PartitionKey == chaveParticao).ToList();
-            return OrdernarPadrao(todos.AsQueryable());
+            var todos = tabela.CreateQuery<TEntidade>().Where(x => true == true);
+            return todos;
         }
 
-        protected virtual IOrderedQueryable<TEntidade> OrdernarPadrao(IQueryable<TEntidade> query)
-        {
-            return query.OrderBy(z => z.RowKey);
-        }
+        //protected virtual IQueryable<TEntidade> OrdernarPadrao(IQueryable<TEntidade> query)
+        //{
+        //    return query.OrderBy(z => z.Timestamp);
+        //}
 
         #endregion
     }

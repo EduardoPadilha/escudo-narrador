@@ -38,12 +38,11 @@ namespace Client.Pages.Termos
                 var tags = ObtemTagsDaBusca(termosBusca);
                 var termoBusca = RemoveHashTags(termosBusca);
 
-                var dataJson = await Http.GetAsync($"/api/{Sistema}/termo", new Dictionary<string, string>
-{
-                {"nome", termoBusca },
-                {"tags", string.Join(';', tags) }
-            }, TabelaEsqueleto.AtualizarLoading);
-                var termos = JsonConvert.DeserializeObject<List<TermoDTO>>(dataJson);
+                var termos = await Http.GetAsync<List<TermoDTO>>($"/api/{Sistema}/termo", new Dictionary<string, string>
+                {
+                    {"nome", termoBusca },
+                    {"tags", string.Join(';', tags) }
+                }, TabelaEsqueleto.AtualizarLoading);
 
                 totalItems = termos.Count();
 

@@ -18,7 +18,7 @@ namespace EscudoNarrador.Repositorio.Repositorios
         }
         public IEnumerable<Termo> ObterTodos(string chaveParticao, string nome, string[] tags)
         {
-            return ObterTodos(chaveParticao, new TermoMapeamentoFiltro(nome, tags));
+            return ObterTodos(new TermoMapeamentoFiltro(chaveParticao, nome, tags));
         }
 
         protected override string NomeTabela => "Termos";

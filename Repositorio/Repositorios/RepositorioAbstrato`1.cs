@@ -74,23 +74,36 @@ namespace EscudoNarrador.Repositorio.Repositorios
             return entidade;
         }
 
-        public virtual IEnumerable<TEntidade> ObterTodos<T>(string chaveParticao, IFiltro<T> filtro)
+        public virtual IEnumerable<TEntidade> ObterTodos<T>(IFiltro<T> filtro)
         {
-            return ObterTodos(chaveParticao, filtro.ObterPredicados());
+            return ObterTodos(filtro.ObterPredicados());
         }
 
-        public virtual IEnumerable<TEntidade> ObterTodos<T>(string chaveParticao, Expression<Func<T, bool>> predicado)
+        public virtual IEnumerable<TEntidade> ObterTodos<T>(Expression<Func<T, bool>> predicado)
         {
-            var todos = ObterTodos(chaveParticao);
+            var todos = ObterTodos();
 
             if (todos == null)
                 throw new RecursoNaoEncontradoException();
 
             var predicadoConvertido = predicado.ConvertePredicado<T, TMapeamento>();
             var consulta = todos.Where(predicadoConvertido).ToList();
-            var resultado = consulta.Como<IEnumerable<TEntidade>>();
 
-            return resultado;
+            return ConverteSeguro(consulta);
+        }
+
+        public IEnumerable<TEntidade> ObterTodos<T>()
+        {
+            var todos = ObterTodos().ToList();
+            return ConverteSeguro(todos);
+        }
+
+        private IEnumerable<TEntidade> ConverteSeguro(IEnumerable<TMapeamento> lista)
+        {
+            if (lista.AnySafe())
+                return lista.Como<IEnumerable<TEntidade>>();
+
+            return Enumerable.Empty<TEntidade>();
         }
     }
 }

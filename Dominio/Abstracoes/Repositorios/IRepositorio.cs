@@ -1,7 +1,5 @@
 ﻿using Nebularium.Tiamat.Abstracoes;
-using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace EscudoNarrador.Dominio.Abstracoes.Repositorios
@@ -12,7 +10,7 @@ namespace EscudoNarrador.Dominio.Abstracoes.Repositorios
         Task<TEntidade> AtualizarAsync(TEntidade entidade);
         Task DeletarAsync(string chaveParticao, string chaveLinha);
         Task<TEntidade> ObterAsync(string chaveParticao, string chaveLinha);
-        IEnumerable<TEntidade> ObterTodos<T>(string chaveParticao, Expression<Func<T, bool>> predicado);
-        IEnumerable<TEntidade> ObterTodos<T>(string chaveParticao, IFiltro<T> filtro);
+        IEnumerable<TEntidade> ObterTodos<T>(IFiltro<T> filtro);
+        IEnumerable<TEntidade> ObterTodos<T>();
     }
 }

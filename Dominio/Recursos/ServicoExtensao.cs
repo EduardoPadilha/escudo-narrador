@@ -1,4 +1,4 @@
-﻿using EscudoNarrador.Dominio.Abstracoes;
+﻿using EscudoNarrador.Dominio.Abstracoes.Servicos;
 using EscudoNarrador.Dominio.Servicos;
 using Microsoft.Extensions.DependencyInjection;
 using Nebularium.Tarrasque.Abstracoes;

@@ -71,14 +71,14 @@ namespace EscudoNarrador.Repositorio.Repositorios
             return entidade;
         }
 
-        public virtual IEnumerable<TEntidade> ObterTodos<T>(string chaveParticao, IFiltro<T> filtro)
+        public virtual IEnumerable<TEntidade> ObterTodos<T>(IFiltro<T> filtro)
         {
-            return ObterTodos(chaveParticao, filtro.ObterPredicados());
+            return ObterTodos(filtro.ObterPredicados());
         }
 
-        public virtual IEnumerable<TEntidade> ObterTodos<T>(string chaveParticao, Expression<Func<T, bool>> predicado)
+        public virtual IEnumerable<TEntidade> ObterTodos<T>(Expression<Func<T, bool>> predicado)
         {
-            var todos = ObterTodos(chaveParticao);
+            var todos = ObterTodos();
 
             if (todos.AnySafe())
                 return Enumerable.Empty<TEntidade>();
@@ -88,6 +88,11 @@ namespace EscudoNarrador.Repositorio.Repositorios
             var resultado = consulta.Como<IEnumerable<TEntidade>>();
 
             return resultado;
+        }
+
+        public IEnumerable<TEntidade> ObterTodos<T>()
+        {
+            return ObterTodos();
         }
     }
 }

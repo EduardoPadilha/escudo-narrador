@@ -1,5 +1,5 @@
 using EscudoNarrador.Api.Extensoes;
-using EscudoNarrador.Dominio.Abstracoes;
+using EscudoNarrador.Dominio.Abstracoes.Servicos;
 using EscudoNarrador.Dominio.Excecoes;
 using EscudoNarrador.Entidade;
 using EscudoNarrador.Fronteira.DTOs;
