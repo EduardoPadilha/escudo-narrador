@@ -31,5 +31,6 @@ namespace EscudoNarrador.Entidade
         public string[] TagsHigienizadas { get; set; }
         public TipoTermo Tipo { get; set; }
         public int Pontos { get; set; }
+        public string Descricao { get; set; }
     }
 }

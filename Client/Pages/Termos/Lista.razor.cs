@@ -1,15 +1,13 @@
 ﻿using Client.Extensoes;
 using Client.Shared;
-using EscudoNarrador.Fronteira.DTOs;
+using EscudoNarrador.Fronteira.DTOs.API;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
-using Nebularium.Tarrasque.Extensoes;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Client.Pages.Termos
@@ -31,18 +29,15 @@ namespace Client.Pages.Termos
         private int totalItems;
         private string termosBusca = "";
 
-        private async Task<TableData<TermoDTO>> ServerReload(TableState state)
+        private async Task<TableData<TermoDTO>> AtualizacaoServidor(TableState state)
         {
             try
             {
-                var tags = ObtemTagsDaBusca(termosBusca);
-                var termoBusca = RemoveHashTags(termosBusca);
-
-                var dataJson = await Http.GetAsync($"/api/{Sistema}/termo", new Dictionary<string, string>
-{
-                {"nome", termoBusca },
-                {"tags", string.Join(';', tags) }
-            }, TabelaEsqueleto.AtualizarLoading);
+                var dataJson = await Http.GetAsync($"/api/termo", new Dictionary<string, string>
+                    {
+                        {"sistema", Sistema },
+                        {"query", termosBusca },
+                    }, TabelaEsqueleto.AtualizarLoading);
                 var termos = JsonConvert.DeserializeObject<List<TermoDTO>>(dataJson);
 
                 totalItems = termos.Count();
@@ -59,20 +54,7 @@ namespace Client.Pages.Termos
             }
         }
 
-        private string RemoveHashTags(string texto)
-        {
-            var regex = new Regex(@"#[\d\w]*");
-            texto = regex.Replace(texto, string.Empty);
-            return texto.Trim();
-        }
-
-        private string[] ObtemTagsDaBusca(string texto)
-        {
-            var correspondencias = Regex.Matches(texto, @"#[\d\w]*");
-            return correspondencias.Select(match => match.Value.RemoverCaracteresEspeciais()).ToArray();
-        }
-
-        private void OnSearch(string text)
+        private void AoProcurar(string text)
         {
             termosBusca = text;
             table.ReloadServerData();

@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using EscudoNarrador.Entidade;
-using EscudoNarrador.Fronteira.DTOs;
+using EscudoNarrador.Fronteira.DTOs.API;
 
 namespace EscudoNarrador.Fronteira.Recursos
 {

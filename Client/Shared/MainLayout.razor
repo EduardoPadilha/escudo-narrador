@@ -37,11 +37,11 @@
         </MudDrawerHeader>
         <MudNavMenu>
             <MudNavLink Href="/">Home</MudNavLink>
-            <MudNavLink Match="NavLinkMatch.All" Href="67f63da9-3f6f-4f75-8c69-9ef45882ea07/termo">Termos</MudNavLink>
+            <MudNavLink Match="NavLinkMatch.All" Href="67F63DA9-3F6F-4F75-8C69-9EF45882EA07/termo">Termos</MudNavLink>
             @*<MudNavLink Match="NavLinkMatch.All">COnfigurações</MudNavLink>*@
         </MudNavMenu>
     </MudDrawer>
-    <MudMainContent Class="pt-16 px-16 mt-4">
+    <MudMainContent Class="px-2 px-sm-4 px-md-16 mt-md-4 mt-sm-4 mt-2">
         @Body
     </MudMainContent>
 </MudLayout>
@@ -79,7 +79,8 @@
     {
         Palette = new Palette()
         {
-            Black = "#272c34"
+            Black = "#272c34",
+            Background = Colors.Grey.Lighten5
         }
     };
     MudTheme temaEscuro = new MudTheme()

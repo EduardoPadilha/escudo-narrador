@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace EscudoNarrador.Repositorio.Repositorios
 {
-    public class TermoComandoRepositorio : ComandoRepositorio<Termo> , ITermoComandoRepositorio
+    public class TermoComandoRepositorio : ComandoRepositorio<Termo>, ITermoComandoRepositorio
     {
         private readonly ITermoConsultaRepositorio consultaRepositorio;
 
@@ -27,24 +27,26 @@ namespace EscudoNarrador.Repositorio.Repositorios
 
         protected async override Task ValidaUnicidade(Termo entidade)
         {
-            var ativosComMesmaChave = await consultaRepositorio.ObterTodosAtivosAsync(c => c.Nome == entidade.Nome && c.Id != entidade.Id);
+            var ativosComMesmaChave = await consultaRepositorio
+                .ObterTodosAtivosAsync(c => c.NomeHigienizado == entidade.NomeHigienizado &&
+                c.Sistema == entidade.Sistema && c.Id != entidade.Id);
 
             if (ativosComMesmaChave.AnySafe())
-                throw new UnicidadeExcecao(entidade.Nome);
+                throw new UnicidadeExcecao(entidade.NomeHigienizado);
         }
 
         protected async override Task ValidaUnicidadeAtualizacao(Expression<Func<Termo, bool>> predicado, List<PropriedadeValor> propriedades)
         {
-            if (!propriedades.Any(c => c.Nome == nameof(Termo.Nome))) return;
+            if (!propriedades.Any(c => c.Nome == nameof(Termo.NomeHigienizado))) return;
             var mutaveis = await consultaRepositorio.ObterTodosAtivosAsync(predicado);
             if (!mutaveis.AnySafe()) return;
 
-            var valor = (string)propriedades.FirstOrDefault(c => c.Nome == nameof(Termo.Nome)).Valor;
+            var valor = (string)propriedades.FirstOrDefault(c => c.Nome == nameof(Termo.NomeHigienizado)).Valor;
 
             if (mutaveis.Count() > 1)
                 throw new UnicidadeExcecao(valor);
 
-            var comUnicidade = await consultaRepositorio.ObterTodosAtivosAsync(c => c.Nome == valor);
+            var comUnicidade = await consultaRepositorio.ObterTodosAtivosAsync(c => c.NomeHigienizado == valor);
 
             if (comUnicidade.Count() > 1) throw new UnicidadeExcecao(valor);
 

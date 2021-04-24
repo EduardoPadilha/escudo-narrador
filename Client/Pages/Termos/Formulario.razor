@@ -3,51 +3,79 @@
 @using EscudoNarrador.Entidade.Enums;
 @using Nebularium.Tarrasque.Extensoes
 
+<link href="css/github-markdown.css" rel="stylesheet" />
 
+<EditForm Model="@modelo" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <MudGrid>
+        <MudItem xs="12" sm="12" md="4">
+            <MudCard>
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">Edição de termo</MudText>
+                    </CardHeaderContent>
+                    <CardHeaderActions>
+                        @if (operacaoAtualizacao)
+                        {
+                            <MudTooltip Text="Deletar">
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="AbrirExclusaoPopUp" />
+                            </MudTooltip>
+                        }
+                    </CardHeaderActions>
+                </MudCardHeader>
 
-<div style="max-width: 400px;margin: auto;">
-    <EditForm Model="@modelo" OnValidSubmit="OnValidSubmit">
-        <DataAnnotationsValidator />
-        <MudCard>
-            <MudCardHeader>
-                <CardHeaderContent>
-                    <MudText Typo="Typo.h6">Edição de termo</MudText>
-                </CardHeaderContent>
-                <CardHeaderActions>
-                    @if (operacaoAtaulizacao)
+                <MudCardContent>
+                    <MudTextField Label="Nome" Variant="Variant.Outlined"
+                                  @bind-Value="modelo.Nome" For="@(() => modelo.Nome)" />
+
+                    <MudTextField Label="Tags" Class="mt-3" Variant="Variant.Outlined"
+                                  @bind-Value="modelo.TagsCampo" For="@(() => modelo.TagsCampo)" />
+
+                    <MudSelect T="TipoTermo" Label="Tipo de termo" Variant="Variant.Outlined"
+                               MultiSelection="true" @bind-SelectedValues="modelo.Tipos">
+                        @foreach (var state in Enum.GetValues<TipoTermo>())
+                        {
+                            <MudSelectItem T="TipoTermo" Value="@state">@state.DescricaoUnica()</MudSelectItem>
+                        }
+                    </MudSelect>
+
+                    <MudField Label="Quantidade de Pontos" Variant="Variant.Outlined">
+                        <MudRating @bind-SelectedValue="modelo.Pontos" MaxValue="10" Color="Color.Dark"
+                                   FullIcon="@Icons.Material.Filled.Circle" EmptyIcon="@Icons.Material.Outlined.Lens" />
+                    </MudField>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        <MudItem xs="12" sm="12" md="8">
+            <MudCard>
+                <MudCardHeader Class="pa-0 pt-3">
+                    <CardHeaderContent>
+                        <MudToolBar Dense="true" Class="px-2" DisableGutters>
+                            <MudIconButton Icon="@Icons.Material.Outlined.FormatBold" Color="Color.Inherit"  Disabled="true"/>
+                            <MudIconButton Icon="@Icons.Material.Outlined.FormatItalic" Color="Color.Inherit"  Disabled="true"/>
+                            <MudToolBarSpacer />
+                            <MudIconButton Icon="@Icons.Material.Filled.Help" Color="Color.Inherit" Link="https://www.markdownguide.org/cheat-sheet/" />
+                            <MudIconButton Icon="@Icons.Material.Filled.Visibility" Color="Color.Inherit" OnClick="MudarPreview" />
+                        </MudToolBar>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent Class="pt-0">
+                    @if (emPreview)
                     {
-                        <MudTooltip Text="Deletar">
-                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="AbrirExclusaoPopUp" />
-                        </MudTooltip>
+                        <MudField Variant="Variant.Outlined" Class="markdown-body">
+                            @modelo.Preview
+                        </MudField>
                     }
-                </CardHeaderActions>
-            </MudCardHeader>
-
-            <MudCardContent>
-                <MudTextField Label="Nome" HelperText="Mín. 3 caracteres" Disabled="@operacaoAtaulizacao"
-                              @bind-Value="modelo.Nome" For="@(() => modelo.Nome)" />
-
-                <MudTextField Label="Tags" Class="mt-3" Lines="2" HelperText="Tags separadas com ',' ou ';'"
-                              @bind-Value="modelo.TagsCampo" For="@(() => modelo.TagsCampo)" />
-
-                <MudSelect T="TipoTermo" Label="Tipo de termo"
-                           MultiSelection="true" @bind-SelectedValues="modelo.Tipos">
-                    @foreach (var state in Enum.GetValues<TipoTermo>())
+                    else
                     {
-                        <MudSelectItem T="TipoTermo" Value="@state">@state.DescricaoUnica()</MudSelectItem>
+                        <MudTextField Lines="15" Variant="Variant.Outlined" @bind-Value="modelo.Descricao" />
                     }
-                </MudSelect>
-
-                <MudField Label="Quantidade de Pontos">
-                    <MudRating @bind-SelectedValue="modelo.Pontos" MaxValue="10" Color="Color.Dark"
-                               FullIcon="@Icons.Material.Filled.Circle" EmptyIcon="@Icons.Material.Outlined.Lens" />
-                </MudField>
-            </MudCardContent>
-
-            <MudCardActions>
-                <MudButton Variant="Variant.Text" Link="@($"{Sistema}/termo")">Voltar</MudButton>
-                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">@(operacaoAtaulizacao?"Salvar": "Cadastrar")</MudButton>
-            </MudCardActions>
-        </MudCard>
-    </EditForm>
-</div>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        <MudItem xs="12" md="12" Class="d-flex flex-row-reverse  my-2 mx-1">
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">@(operacaoAtualizacao?"Salvar": "Cadastrar")</MudButton>
+            <MudButton Variant="Variant.Outlined" Link="@($"{Sistema}/termo")" Color="Color.Secondary">Cancelar</MudButton>
+        </MudItem>
+    </MudGrid>
+</EditForm>
