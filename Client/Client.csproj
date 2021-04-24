@@ -12,8 +12,6 @@
     <PackageReference Include="MudBlazor" Version="5.0.7" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="System.Net.Http.Json" Version="5.0.0" />
-
-    <Watch Include="..\Client\**\*.razor" />
   </ItemGroup>
 
   <ItemGroup>
