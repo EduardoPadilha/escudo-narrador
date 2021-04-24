@@ -11,7 +11,6 @@ namespace EscudoNarrador.Api
         public override void Configure(IFunctionsHostBuilder builder)
         {
             builder.Services
-                .AddOpcoes()
                 .AddAutoMapper()
                 .AddRepositorios()
                 .AddRecursos()

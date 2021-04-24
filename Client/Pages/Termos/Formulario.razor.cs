@@ -7,8 +7,8 @@ using System;
 using System.Net.Http;
 using Nebularium.Tarrasque.Extensoes;
 using Microsoft.AspNetCore.Components.Forms;
-using EscudoNarrador.Fronteira.DTOs;
 using Client.VOs;
+using EscudoNarrador.Fronteira.DTOs.API;
 
 namespace Client.Pages.Termos
 {
@@ -19,7 +19,7 @@ namespace Client.Pages.Termos
         [Inject] public IDialogService DialogService { get; set; }
 
         [Parameter] public string Id { get; set; }
-        [Parameter] public Guid Sistema { get; set; }
+        [Parameter] public string Sistema { get; set; }
 
         [CascadingParameter]
         public ErroComponente Error { get; set; }
@@ -27,9 +27,15 @@ namespace Client.Pages.Termos
         [CascadingParameter]
         public GerenciadorLoading Loading { get; set; }
 
-        private bool operacaoAtaulizacao = false;
-        private TermoVO modelo = new TermoVO();
+        private bool emPreview = false;
+        private bool operacaoAtualizacao = false;
+        private TermoVO modelo = new();
+        private const string TERMO_PATH = "/api/termo";
 
+        private void MudarPreview()
+        {
+            emPreview = !emPreview;
+        }
 
         private void LimparFormulario()
         {
@@ -49,7 +55,7 @@ namespace Client.Pages.Termos
 
             try
             {
-                var deleteResultado = await Http.DeleteAsync<Termo>($"/api/{Sistema}/termo/{modelo.Nome}", Loading.AtualizarLoading);
+                var deleteResultado = await Http.DeleteAsync<Termo>($"{TERMO_PATH}/{modelo.Id}", Loading.AtualizarLoading);
                 LimparFormulario();
                 Snackbar.Add("Registro deletado!", Severity.Success);
             }
@@ -65,11 +71,10 @@ namespace Client.Pages.Termos
             HttpResponseMessage resposta;
             try
             {
-                var path = $"/api/{Sistema}/termo";
-                if (operacaoAtaulizacao)
-                    resposta = await Http.PutAsJsonAsync(path, modelo.ParaDTO(), Loading.AtualizarLoading);
+                if (operacaoAtualizacao)
+                    resposta = await Http.PutAsJsonAsync($"{TERMO_PATH}/{modelo.Id}", modelo.ParaDTO(), Loading.AtualizarLoading);
                 else
-                    resposta = await Http.PostAsJsonAsync(path, modelo.ParaDTO(), Loading.AtualizarLoading);
+                    resposta = await Http.PostAsJsonAsync(TERMO_PATH, modelo.ParaDTO(), Loading.AtualizarLoading);
 
                 LimparFormulario();
 
@@ -85,11 +90,11 @@ namespace Client.Pages.Termos
 
         protected async override void OnInitialized()
         {
-            operacaoAtaulizacao = !Id.LimpoNuloBranco();
-            if (!operacaoAtaulizacao) return;
+            operacaoAtualizacao = !Id.LimpoNuloBranco();
+            if (!operacaoAtualizacao) return;
             try
             {
-                var termo = await Http.GetAsync<TermoDTO>($"/api/{Sistema}/termo/{Id}", atualizaLoading: Loading.AtualizarLoading);
+                var termo = await Http.GetAsync<TermoDTO>($"{TERMO_PATH}/{Id}", atualizaLoading: Loading.AtualizarLoading);
                 if (termo == null)
                 {
                     Error.ProcessarErro($"Não foi possível recuperar o registro {Id} para edição.");

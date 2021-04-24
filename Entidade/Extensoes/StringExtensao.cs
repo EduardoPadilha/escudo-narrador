@@ -1,7 +1,7 @@
 ﻿using Nebularium.Tarrasque.Extensoes;
 using System.Text.RegularExpressions;
 
-namespace EscudoNarrador.Dominio.Extensoes
+namespace EscudoNarrador.Entidade.Extensoes
 {
     public static class StringExtensao
     {

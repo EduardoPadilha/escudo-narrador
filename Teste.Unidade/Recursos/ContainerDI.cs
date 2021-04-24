@@ -21,7 +21,6 @@ namespace Teste.Unidade.Recursos
             Servicos.AddSingleton(sp => configuracao);
 
             Servicos
-                .AddOpcoes()
                 .AddAutoMapper()
                 .AddRepositorios()
                 .AddServicos();
