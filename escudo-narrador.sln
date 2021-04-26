@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fronteira", "Fronteira\Fron
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Entidade", "Entidade\Entidade.csproj", "{E62B87CF-D4F4-4D21-8D39-0F6E5DC2B63F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Teste.Unidade", "Teste.Unidade\Teste.Unidade.csproj", "{9A40AE65-9A4E-444A-8C5F-7F3CA2768B50}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Teste.Unidade", "Teste.Unidade\Teste.Unidade.csproj", "{9A40AE65-9A4E-444A-8C5F-7F3CA2768B50}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
