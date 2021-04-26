@@ -4,6 +4,7 @@ using Nebularium.Tarrasque.Extensoes;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
@@ -74,13 +75,19 @@ namespace Client.Extensoes
 
             var json = await resposta.Content.ReadAsStringAsync();
 
-            if (json.LimpoNuloBranco())
-                throw new Exception($"[{resposta.StatusCode}] {resposta.ReasonPhrase}");
-
-            var erroValidacao = JsonConvert.DeserializeObject<ErroValidacao[]>(json);
+            var erroValidacao = Enumerable.Empty<ErroValidacao>();
+            try
+            {
+                erroValidacao = JsonConvert.DeserializeObject<ErroValidacao[]>(json);
+            }
+            catch
+            {
+                throw new Exception(json);
+            }
             if (erroValidacao.AnySafe())
                 throw new ValidacaoExcecao(erroValidacao);
-            throw new Exception(json);
+
+            throw new Exception($"[{resposta.StatusCode}] {resposta.ReasonPhrase}");
         }
 
         private static void TrataAtualizacaoLoading(this Action<bool> atualizaLoading, bool valor)

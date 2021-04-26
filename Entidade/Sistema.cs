@@ -1,23 +1,32 @@
-﻿using System;
+﻿using EscudoNarrador.Entidade.Extensoes;
+using System;
+using System.Collections.Generic;
 
 namespace EscudoNarrador.Entidade
 {
-    public class Sistema
+    public class Sistema : EntidadeNomeHigienizado
     {
-        public Sistema(string nome, string versao, Guid id)
+        public string Abreviacao { get; set; }
+        public List<Versao> Versoes { get; set; }
+
+        public Guid AdicionarVersao(Versao versao)
         {
-            Nome = nome;
-            Versao = versao;
-            Id = id;
+            return Versoes.Adicionar(versao);
         }
 
-        public string Nome { get; set; }
-        public string Versao { get; set; }
-        public Guid Id { get; set; }
-
-        public static Sistema Novo(string nome, string versao)
+        public bool AtualizarVersao(Versao versao)
         {
-            return new Sistema(nome, versao, Guid.NewGuid());
+            return Versoes.Atualizar(versao);
+        }
+
+        public bool RemoverVersao(Versao versao)
+        {
+            return Versoes.Remover(versao);
+        }
+
+        public Versao ObterVersao(Guid id)
+        {
+            return Versoes.Obter(id);
         }
     }
 }

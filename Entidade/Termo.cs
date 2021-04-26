@@ -1,14 +1,26 @@
 ﻿using EscudoNarrador.Entidade.Enums;
-using System;
+using EscudoNarrador.Entidade.Extensoes;
+using System.Linq;
 
 namespace EscudoNarrador.Entidade
 {
-    public class Termo
+    public class Termo : EntidadeNomeHigienizado
     {
-        public Guid Sistema { get; set; }
-        public string Nome { get; set; }
-        public string[] Tags { get; set; }
+        public string Sistema { get; set; }
+
+        private string[] tags;
+        public string[] Tags
+        {
+            get => tags;
+            set
+            {
+                tags = value;
+                TagsHigienizadas = tags?.Select(c => c.HigienizaString())?.ToArray();
+            }
+        }
+        public string[] TagsHigienizadas { get; set; }
         public TipoTermo Tipo { get; set; }
         public int Pontos { get; set; }
+        public string Descricao { get; set; }
     }
 }

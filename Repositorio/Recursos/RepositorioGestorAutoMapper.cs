@@ -8,7 +8,7 @@ namespace EscudoNarrador.Repositorio.Recursos
         public RepositorioGestorAutoMapper()
         {
             AdicionarConfig(cfg => cfg.AddExpressionMapping());
-            AdicionarPerfil<PerfilMapeamento>();
+            //AdicionarPerfil<PerfilMapeamento>();
         }
     }
 }

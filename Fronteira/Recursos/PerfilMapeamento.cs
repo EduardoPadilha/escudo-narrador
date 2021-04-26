@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using EscudoNarrador.Entidade;
-using EscudoNarrador.Fronteira.DTOs;
+using EscudoNarrador.Fronteira.DTOs.API;
 
 namespace EscudoNarrador.Fronteira.Recursos
 {
@@ -9,6 +9,8 @@ namespace EscudoNarrador.Fronteira.Recursos
         public PerfilMapeamento()
         {
             CreateMap<Termo, TermoDTO>().ReverseMap();
+            CreateMap<Sistema, SistemaDTO>().ReverseMap();
+            CreateMap<Versao, VersaoDTO>().ReverseMap();
         }
     }
 }

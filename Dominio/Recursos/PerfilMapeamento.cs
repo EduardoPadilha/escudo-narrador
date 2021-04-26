@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using EscudoNarrador.Entidade;
 using FluentValidation.Results;
 using Nebularium.Tiamat.Abstracoes;
 using Nebularium.Tiamat.Recursos;
@@ -14,6 +15,9 @@ namespace EscudoNarrador.Dominio.Recursos
             CreateMap<ValidationFailure, ErroValidacao>().ForMember(d => d.Mensagem, op => op.MapFrom(o => o.ErrorMessage))
                 .ForMember(d => d.NomePropriedade, op => op.MapFrom(o => o.PropertyName));
             CreateMap<IPaginacao, Paginador>();
+
+            //Inject
+            CreateMap<Termo, Termo>();
         }
     }
 }

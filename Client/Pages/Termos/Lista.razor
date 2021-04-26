@@ -1,6 +1,6 @@
-﻿@page "/{sistema:guid}/termo"
+﻿@page "/{sistema}/termo"
 
-@using EscudoNarrador.Fronteira.DTOs;
+@using EscudoNarrador.Fronteira.DTOs.API;
 
 <style>
     .app-fab--absolute {
@@ -15,11 +15,11 @@
 <TableSkeleton Dense="true" Labels="Nome;Tipo;Tags;Pontos Fixos;Configs" QtdLinhas="10" @ref="TabelaEsqueleto">
 
     <MudTable Hover="true" Breakpoint="Breakpoint.Sm" Dense="true" @ref="table"
-              ServerData="@(new Func<TableState, Task<TableData<TermoDTO>>>(ServerReload))">
+              ServerData="@(new Func<TableState, Task<TableData<TermoDTO>>>(AtualizacaoServidor))">
         <ToolBarContent>
             <MudText Class="d-none d-sm-flex" Typo="Typo.h6">Termos</MudText>
             <MudToolBarSpacer />
-            <MudTextField T="string" ValueChanged="@(s=>OnSearch(s))" Placeholder="nome, tags separadas por ';'" Adornment="Adornment.Start"
+            <MudTextField T="string" ValueChanged="@(s=>AoProcurar(s))" Placeholder="@("use '@' para nomes, '#' para tags e palavras soltas para descrição")" Adornment="Adornment.Start"
                           AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
         </ToolBarContent>
         <HeaderContent>
@@ -36,7 +36,7 @@
             <MudTd DataLabel="Pontos Fixos">@context.Pontos</MudTd>
             <MudTd>
                 <MudTooltip Text="Gerenciar">
-                    <MudIconButton Icon="@Icons.Material.Filled.Settings" Link="@($"{Sistema}/termo/formulario/{context.Nome}")" Size="Size.Small"></MudIconButton>
+                    <MudIconButton Icon="@Icons.Material.Filled.Settings" Link="@($"{Sistema}/termo/formulario/{context.Id}")" Size="Size.Small"></MudIconButton>
                 </MudTooltip>
             </MudTd>
         </RowTemplate>

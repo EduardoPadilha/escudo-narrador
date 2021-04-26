@@ -1,17 +1,19 @@
 using EscudoNarrador.Api.Extensoes;
 using EscudoNarrador.Dominio.Abstracoes.Servicos;
 using EscudoNarrador.Dominio.Excecoes;
+using EscudoNarrador.Dominio.Filtros;
 using EscudoNarrador.Entidade;
-using EscudoNarrador.Fronteira.DTOs;
-using EscudoNarrador.Repositorio.Excecoes;
+using EscudoNarrador.Fronteira.DTOs.API;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Nebularium.Tarrasque.Extensoes;
+using Nebularium.Tiamat.Excecoes;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -19,8 +21,6 @@ namespace EscudoNarrador.Api.Funcoes
 {
     public class TermoApi
     {
-        private const string MSG_NAO_ENCONTRADO = "Erro em {0}, a chave do termo deve vir no path da requisição.";
-        private const string MSG_SISTEMA_NAO_ENCONTRADO = "O id do sistema deve ser informado.";
         private readonly ITermoServico servico;
         public TermoApi(ITermoServico servico)
         {
@@ -28,130 +28,114 @@ namespace EscudoNarrador.Api.Funcoes
         }
 
         [FunctionName(nameof(ObterTermos))]
-        public IActionResult ObterTermos(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "{sistema}/termo")]
-        HttpRequest req, ILogger log, Guid sistema)
+        public async Task<IActionResult> ObterTermos(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "termo")]
+        HttpRequest req, ILogger log)
         {
-            var nome = req.Query.Obter<string>("nome");
-            var tags = req.Query.Obter<string>("tags");
+            var query = req.Query.Obter<string>("query");
+            var sistema = req.Query.Obter<string>("sistema");
             try
             {
-                var resultado = servico.ObterTodos(sistema, nome, tags);
-                return new OkObjectResult(resultado);
+                var resultado = await servico.ObterTodosAsync(new TermoFiltro(sistema, query));
+                return RetornarSucesso<IEnumerable<TermoDTO>>(resultado);
             }
             catch (ValidacaoExcecao e)
             {
-                var mensagem = JsonConvert.SerializeObject(e.Erros);
-                log.LogError(mensagem);
-                return new BadRequestObjectResult(mensagem);
+                return RetornaFalha(log, JsonConvert.SerializeObject(e.Erros));
             }
             catch (Exception e)
             {
-                var mensagem = e.GetBaseException().Message;
-                log.LogError(mensagem);
-                return new BadRequestObjectResult(mensagem);
+                return RetornaFalha(log, e.GetBaseException().Message);
             }
         }
 
         [FunctionName(nameof(ObterTermoPorChaves))]
         public async Task<IActionResult> ObterTermoPorChaves(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "{sistema}/termo/{nome}")]
-        HttpRequest req, ILogger log, Guid sistema, string nome)
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "termo/{id}")]
+        HttpRequest req, ILogger log, string id)
         {
-            if (string.IsNullOrWhiteSpace(nome))
-            {
-                var argumentoMsg = string.Format(MSG_NAO_ENCONTRADO, nameof(ObterTermoPorChaves));
-                log.LogError(argumentoMsg);
-                return new BadRequestObjectResult(new { erro = argumentoMsg });
-            }
-            Termo result;
             try
             {
-                result = await servico.ObterAsync(sistema, nome); ;
+                var resultado = await servico.ObterAsync(id); ;
+                return RetornarSucesso<TermoDTO>(resultado);
             }
             catch (ValidacaoExcecao e)
             {
-                var mensagem = JsonConvert.SerializeObject(e.Erros);
-                log.LogError(mensagem);
-                return new BadRequestObjectResult(mensagem);
+                return RetornaFalha(log, JsonConvert.SerializeObject(e.Erros));
             }
-            catch (RecursoNaoEncontradoException)
+            catch (RecursoNaoEncontradoExcecao ex)
             {
-                return new NotFoundObjectResult("Termo não encontrado");
+                return new NotFoundObjectResult(ex.Message);
             }
             catch (Exception e)
             {
-                var mensagem = e.GetBaseException().Message;
-                log.LogError(mensagem);
-                return new BadRequestObjectResult(mensagem);
+                return RetornaFalha(log, e.GetBaseException().Message);
             }
-            return new OkObjectResult(result);
         }
 
         [FunctionName(nameof(SalvarTermo))]
         public async Task<IActionResult> SalvarTermo(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", "put", Route = "{sistema}/termo")]
-        HttpRequest req, ILogger log, Guid sistema)
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", "put", Route = "termo/{id?}")]
+        HttpRequest req, ILogger log, string id)
         {
             var content = await new StreamReader(req.Body).ReadToEndAsync();
-
-            var dto = JsonConvert.DeserializeObject<TermoDTO>(content);
             try
             {
-                var entidade = dto.Como<Termo>();
-                entidade.Sistema = sistema;
-                Termo resultado;
-                if (HttpMethods.IsPost(req.Method))
-                    resultado = await servico.AdicionarAsync(entidade);
-                else resultado = await servico.AtualizarAsync(entidade);
-                return new OkObjectResult(resultado);
+                var post = HttpMethods.IsPost(req.Method);
+                var resultado = await SalvarAsync(content, post, id);
+
+                return RetornarSucesso<TermoDTO>(resultado);
             }
             catch (ValidacaoExcecao e)
             {
-                var mensagem = JsonConvert.SerializeObject(e.Erros);
-                log.LogError(mensagem);
-                return new BadRequestObjectResult(mensagem);
+                return RetornaFalha(log, JsonConvert.SerializeObject(e.Erros));
             }
             catch (Exception e)
             {
-                var mensagem = e.GetBaseException().Message;
-                log.LogError(mensagem);
-                return new BadRequestObjectResult(mensagem);
+                return RetornaFalha(log, e.GetBaseException().Message);
             }
+        }
+
+        private async Task<Termo> SalvarAsync(string body, bool post, string id)
+        {
+            var dto = JsonConvert.DeserializeObject<TermoDTO>(body);
+            var entidade = dto.Como<Termo>();
+            if (post)
+                return await servico.AdicionarAsync(entidade);
+
+            entidade.Id = id;
+            return await servico.AtualizarAsync(entidade);
         }
 
         [FunctionName(nameof(DeletarTermo))]
         public async Task<IActionResult> DeletarTermo(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "{sistema}/termo/{nome}")]
-        HttpRequest req, ILogger log, Guid sistema, string nome)
+            [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "termo/{id}")]
+        HttpRequest req, ILogger log, string id)
         {
-            if (string.IsNullOrWhiteSpace(nome))
-            {
-                var argumentMsg = string.Format(MSG_NAO_ENCONTRADO, nameof(DeletarTermo)); ;
-                log.LogError(argumentMsg);
-                return new BadRequestObjectResult(new { erro = argumentMsg });
-            }
             try
             {
-                await servico.DeletarAsync(sistema, nome);
+                await servico.DeletarAsync(id);
+                return new OkResult();
             }
             catch (ValidacaoExcecao e)
             {
-                var mensagem = JsonConvert.SerializeObject(e.Erros);
-                log.LogError(mensagem);
-                return new BadRequestObjectResult(mensagem);
-            }
-            catch (RecursoNaoEncontradoException)
-            {
-                return new NotFoundObjectResult("Característica não encontrada");
+                return RetornaFalha(log, JsonConvert.SerializeObject(e.Erros));
             }
             catch (Exception e)
             {
-                var mensagem = e.GetBaseException().Message;
-                log.LogError(mensagem);
-                return new BadRequestObjectResult(mensagem);
+                return RetornaFalha(log, e.GetBaseException().Message);
             }
-            return new OkResult();
+        }
+
+        private IActionResult RetornaFalha(ILogger log, string mensagem)
+        {
+            log.LogError(mensagem);
+            return new BadRequestObjectResult(mensagem);
+        }
+
+        private IActionResult RetornarSucesso<T>(object resultado)
+        {
+            return new OkObjectResult(resultado.Como<T>());
         }
     }
 }
