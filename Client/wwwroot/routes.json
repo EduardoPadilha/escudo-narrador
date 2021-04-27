@@ -1,13 +1,17 @@
 ﻿{
   "routes": [
     {
+      "route": "/{sistema}/termo/*",
+      "allowedRoles": [ "authenticated" ]
+    },
+    {
+      "route": "/Login",
+      "allowedRoles": [ "authenticated" ]
+    },
+    {
       "route": "/*",
       "serve": "/index.html",
       "statusCode": 200
-    },
-    {
-      "route": "/{sistema}/termo/*",
-      "allowedRoles": [ "authenticated" ]
     }
   ]
 }
