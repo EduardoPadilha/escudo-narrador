@@ -1,21 +1,60 @@
 ﻿@page "/Login"
 
-<MudButton Variant="Variant.Outlined" EndIcon="@Icons.Custom.Brands.Twitter" 
-           Link="/.auth/login/twitter">Twitter</MudButton>
-<MudButton Variant="Variant.Outlined" EndIcon="@Icons.Custom.Brands.GitHub"
-           Link="/.auth/login/github">GitHub</MudButton>
-<MudButton Variant="Variant.Outlined" EndIcon="@Icons.Custom.Brands.Microsoft"
-           Link="/.auth/login/microsoftaccount">Microsoft</MudButton>
-<MudButton Variant="Variant.Outlined" EndIcon="@Icons.Custom.Brands.Facebook"
-           Link="/.auth/login/facebook">Facebook</MudButton>
-<MudButton Variant="Variant.Outlined" EndIcon="@Icons.Custom.Brands.Google"
-           Link="/.auth/login/Google">google</MudButton>
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager Navigation
+@inject SignOutSessionStateManager SignOutManager
+@inject HttpClient Http
 
 
 
-<MudButton Variant="Variant.Outlined" EndIcon="@Icons.Filled.Logout"
-           Link="/.auth/logout">Sair</MudButton>
+<AuthorizeView>
+    <Authorized>
+        <MudButton Variant="Variant.Outlined" EndIcon="@Icons.Filled.Logout"
+                   OnClick="BeginSignOut">Sair</MudButton>
+    </Authorized>
+    <NotAuthorized>
+        <MudButton Variant="Variant.Outlined" EndIcon="@Icons.Custom.Brands.Google"
+                   Link="/authentication/login">google</MudButton>
+    </NotAuthorized>
+</AuthorizeView>
+
+<MudButton Variant="Variant.Filled" Color="Color.Secondary" EndIcon="@Icons.Filled.Security" OnClick="ObterSeguranca">@Texto</MudButton>
+
+
 
 @code {
+    string Texto = "Teste sua sergurança: =/";
 
+    [CascadingParameter]
+    public GerenciadorLoading Loading { get; set; }
+    [CascadingParameter]
+    public ErroComponente Error { get; set; }
+
+    private async Task ObterSeguranca()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        try
+        {
+            var dataJson = await Http.GetAsync($"/api/seguranca", new Dictionary<string, string>
+{
+                        {"name", user.Identity.Name }
+                    }, Loading.AtualizarLoading);
+            Texto = dataJson;
+        }
+        catch (Exception e)
+        {
+            Loading.AtualizarLoading(false);
+            Error.ProcessarErro(e);
+        }
+    }
+
+    private async Task BeginSignOut(MouseEventArgs args)
+    {
+        await SignOutManager.SetSignOutState();
+        Navigation.NavigateTo("authentication/logout");
+    }
 }
