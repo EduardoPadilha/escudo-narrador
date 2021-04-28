@@ -14,7 +14,7 @@ namespace EscudoNarrador.Api.Funcoes
     {
         [FunctionName("SegurancaApi")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.User, "get", "post", Route = "seguranca")] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "seguranca")] HttpRequest req,
             ILogger log, ClaimsPrincipal principal)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
