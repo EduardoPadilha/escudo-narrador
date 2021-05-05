@@ -29,6 +29,7 @@ namespace Client.Extensoes
 
             Console.WriteLine($"[Disparando GET] URL = {url}");
             var resposta = await cliente.GetAsync(url);
+            Console.WriteLine($"[Resposta do GET] [{resposta.StatusCode}]: {await resposta.Content.ReadAsStringAsync()}");
             await VerificaRetorno(resposta);
             atualizaLoading.TrataAtualizacaoLoading(false);
             return await MontaResposta(resposta);

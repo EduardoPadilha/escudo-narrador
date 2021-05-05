@@ -1,14 +1,31 @@
-<ErroComponente>
-    <GerenciadorLoading>
-        <Router AppAssembly="@typeof(Program).Assembly" PreferExactMatches="@true">
-            <Found Context="routeData">
-                <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
-            </Found>
-            <NotFound>
-                <LayoutView Layout="@typeof(MainLayout)">
-                    <p>Desculpe, não existe nada aqui</p>
-                </LayoutView>
-            </NotFound>
-        </Router>
-    </GerenciadorLoading>
-</ErroComponente>
+<CascadingAuthenticationState>
+    <ErroComponente>
+        <GerenciadorLoading>
+
+            <Router AppAssembly="@typeof(Program).Assembly" PreferExactMatches="@true">
+                <Found Context="routeData">
+                    <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+                        <NotAuthorized>
+                            @if (!context.User.Identity.IsAuthenticated)
+                            {
+                                <RedirectToLogin />
+                            }
+                            else
+                            {
+                                <p>
+                                    Você não está autorizado a acessar esse recurso.
+                                </p>
+                            }
+                        </NotAuthorized>
+                    </AuthorizeRouteView>
+                </Found>
+                <NotFound>
+                    <LayoutView Layout="@typeof(MainLayout)">
+                        <p>Desculpe, não existe nada aqui</p>
+                    </LayoutView>
+                </NotFound>
+            </Router>
+
+        </GerenciadorLoading>
+    </ErroComponente>
+</CascadingAuthenticationState>

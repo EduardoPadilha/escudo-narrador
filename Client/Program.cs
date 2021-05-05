@@ -1,4 +1,7 @@
+using Client.Recursos;
+using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MudBlazor.Services;
 using System;
@@ -15,8 +18,21 @@ namespace Client
             builder.RootComponents.Add<App>("#app");
 
             var baseAddress = builder.Configuration["BaseAddress"] ?? builder.HostEnvironment.BaseAddress;
-            builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(baseAddress) });
+
+            //builder.Services.AddScoped<CustomAuthorizationMessageHandler>();
+            builder.Services.AddHttpClient("AzureFunctionsApi", client => client.BaseAddress = new Uri(baseAddress))
+                .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
+
+            builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>()
+                .CreateClient("AzureFunctionsApi"));
+
             builder.Services.AddMudServices();
+            builder.Services.AddOptions();
+            builder.Services.AddAuthorizationCore();
+            builder.Services.AddOidcAuthentication(options =>
+            {
+                builder.Configuration.Bind("Local", options.ProviderOptions);
+            });
 
             await builder.Build().RunAsync();
         }

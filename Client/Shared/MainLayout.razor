@@ -26,10 +26,12 @@
         <MudText Typo="Typo.h5" Class="mudblazor-appbar-brand-text">Escudo do Narrador</MudText>
 
         <MudAppBarSpacer />
+        <MudIconButton Icon="@Icons.Filled.Home" Color="Color.Inherit" Link="/login"/>
         <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/EduardoPadilha" Target="_blank" />
         <MudTooltip Text="Modo Claro/Escuro">
             <MudIconButton Icon="@Icons.Filled.Brightness4" Color="Color.Inherit" OnClick="((e) => DarkMode())" />
         </MudTooltip>
+        <LoginDisplay />
     </MudAppBar>
     <MudDrawer @bind-Open="@aberto" Elevation="1" Variant="@DrawerVariant.Temporary">
         <MudDrawerHeader>
