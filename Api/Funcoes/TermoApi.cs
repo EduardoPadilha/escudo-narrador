@@ -7,13 +7,17 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
+using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Enums;
 using Microsoft.Extensions.Logging;
+using Microsoft.OpenApi.Models;
 using Nebularium.Tarrasque.Extensoes;
 using Nebularium.Tiamat.Excecoes;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace EscudoNarrador.Api.Funcoes
@@ -27,6 +31,11 @@ namespace EscudoNarrador.Api.Funcoes
         }
 
         [FunctionName(nameof(ObterTermos))]
+        [OpenApiOperation(operationId: nameof(ObterTermos), tags: new[] { "Termos" })]
+        [OpenApiSecurity("function_key", SecuritySchemeType.ApiKey, Name = "code", In = OpenApiSecurityLocationType.Query)]
+        [OpenApiParameter(name: "query", In = ParameterLocation.Query, Required = false, Type = typeof(string), Description = "A **Query** da consulta")]
+        [OpenApiParameter(name: "sistema", In = ParameterLocation.Query, Required = true, Type = typeof(string), Description = "O **Sistema** da busca")]
+        [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(IEnumerable<TermoDTO>), Summary = "operação bem sucedida", Description = "operação bem sucedida")]
         public async Task<IActionResult> ObterTermos(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "termo")]
         HttpRequest req, ILogger log)
@@ -49,6 +58,10 @@ namespace EscudoNarrador.Api.Funcoes
         }
 
         [FunctionName(nameof(ObterTermoPorChaves))]
+        [OpenApiOperation(operationId: nameof(ObterTermoPorChaves), tags: new[] { "Termos" })]
+        [OpenApiSecurity("function_key", SecuritySchemeType.ApiKey, Name = "code", In = OpenApiSecurityLocationType.Query)]
+        [OpenApiParameter(name: "id", In = ParameterLocation.Path, Required = true, Type = typeof(string), Description = "o **nome** termo")]
+        [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(TermoDTO), Summary = "operação bem sucedida", Description = "operação bem sucedida")]
         public async Task<IActionResult> ObterTermoPorChaves(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "termo/{id}")]
         HttpRequest req, ILogger log, string id)
