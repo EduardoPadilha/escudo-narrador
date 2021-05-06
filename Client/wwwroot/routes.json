@@ -4,10 +4,6 @@
       "route": "/*",
       "serve": "/index.html",
       "statusCode": 200
-    },
-    {
-      "route": "/{sistema}/termo/*",
-      "allowedRoles": [ "authenticated" ]
     }
   ]
 }
